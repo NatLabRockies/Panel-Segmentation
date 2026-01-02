@@ -88,7 +88,7 @@ img_scales = [
 ]
 interval = 10
 launcher = 'none'
-load_from = '/kfs2/projects/pvfleets24/repos/cv-dl-framework/runs/automated_geotagging/17_10_2025_14_11_24/best_coco_bbox_mAP_50_epoch_300.pth'
+load_from = '/17_10_2025_14_11_24/best_coco_bbox_mAP_50_epoch_300.pth'
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
 max_epochs = 300
@@ -209,8 +209,7 @@ test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
     batch_size=5,
     dataset=dict(
-        ann_file=
-        '/kfs2/projects/pvfleets24/repos/cv-dl-framework/test/label_json.json',
+        ann_file='/cv-dl-framework/test/label_json.json',
         backend_args=None,
         data_prefix=dict(
             img='/kfs2/projects/pvfleets24/repos/cv-dl-framework/test/images/'
@@ -258,8 +257,7 @@ test_dataloader = dict(
     persistent_workers=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 test_evaluator = dict(
-    ann_file=
-    '/kfs2/projects/pvfleets24/repos/cv-dl-framework/test/label_json.json',
+    ann_file='/cv-dl-framework/test/label_json.json',
     backend_args=None,
     format_only=False,
     metric=[
@@ -311,13 +309,12 @@ train_dataloader = dict(
     batch_sampler=None,
     batch_size=4,
     dataset=dict(
-        ann_file=
-        '/kfs2/projects/pvfleets24/repos/cv-dl-framework/train/label_json.json',
+        ann_file='/cv-dl-framework/train/label_json.json',
         backend_args=None,
         data_prefix=dict(
-            img='/kfs2/projects/pvfleets24/repos/cv-dl-framework/train/images/'
+            img='/cv-dl-framework/train/images/'
         ),
-        data_root='/kfs2/projects/pvfleets24/repos/cv-dl-framework',
+        data_root='/cv-dl-framework',
         filter_cfg=dict(filter_empty_gt=True, min_size=32),
         metainfo=dict(
             classes=(
@@ -561,13 +558,12 @@ val_cfg = dict(type='ValLoop')
 val_dataloader = dict(
     batch_size=5,
     dataset=dict(
-        ann_file=
-        '/kfs2/projects/pvfleets24/repos/cv-dl-framework/test/label_json.json',
+        ann_file='/cv-dl-framework/test/label_json.json',
         backend_args=None,
         data_prefix=dict(
-            img='/kfs2/projects/pvfleets24/repos/cv-dl-framework/test/images/'
+            img='/cv-dl-framework/test/images/'
         ),
-        data_root='/kfs2/projects/pvfleets24/repos/cv-dl-framework',
+        data_root='/cv-dl-framework',
         metainfo=dict(
             classes=(
                 'tracker-row',
@@ -610,8 +606,7 @@ val_dataloader = dict(
     persistent_workers=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 val_evaluator = dict(
-    ann_file=
-    '/kfs2/projects/pvfleets24/repos/cv-dl-framework/test/label_json.json',
+    ann_file='/cv-dl-framework/test/label_json.json',
     backend_args=None,
     format_only=False,
     metric=[
@@ -632,8 +627,7 @@ visualizer = dict(
     type='DetLocalVisualizer',
     vis_backends=[
         dict(
-            save_dir=
-            '/kfs2/projects/pvfleets24/repos/cv-dl-framework/runs/automated_geotagging/17_10_2025_14_11_24',
+            save_dir='/17_10_2025_14_11_24',
             type='LocalVisBackend'),
     ])
-work_dir = '/kfs2/projects/pvfleets24/repos/cv-dl-framework/runs/automated_geotagging/17_10_2025_14_11_24'
+work_dir = '/17_10_2025_14_11_24'
