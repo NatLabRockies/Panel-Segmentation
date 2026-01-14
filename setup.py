@@ -18,7 +18,7 @@ KEYWORDS = [
 
 INSTALL_REQUIRES = [
     'opencv-python-headless==4.6.0.66',
-    'numpy==1.24.3',
+    'numpy>=1.18.1',
     'scikit_image>=0.16.2',
     'matplotlib>=3.1.3',
     'requests>=2.22.0',

@@ -10,3 +10,4 @@ This example gallery contains examples showcasing the functionalities of the pan
    mesh_scan/index
    lidar/index
    panel_detection/index
+   automated_geotagging/index
