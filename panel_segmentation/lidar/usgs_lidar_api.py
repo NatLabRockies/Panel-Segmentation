@@ -425,7 +425,7 @@ class USGSLidarAPI:
             # Prevents high traffic to website if downloading consecutive files
             time.sleep(10)
             # Stream download the file with chunking since files are large
-            with requests.get(laz_link, stream=True) as r:
+            with requests.get(laz_link, stream=True, verify=False) as r:
                 r.raise_for_status()
                 with open(laz_file_path, "wb") as f:
                     for chunk in r.iter_content(chunk_size=chunk_size):
