@@ -100,7 +100,7 @@ class PlaneSegmentation:
                     "tilt": tilt,
                     "azimuth": az,
                     "num_points": len(inliers),
-                    "pcd": plane_pcd,
+                    "pcd": np.asarray(plane_pcd.points),
                     "color": color
                 }
                 self.plane_list.append(plane_info_dict)
