@@ -32,7 +32,9 @@ https://git-lfs.github.com/
 
 2. Once git lfs is installed, you can now install Panel-Segmentation on your computer. We are still working on making panel-segmentation available via PyPi, so entering the following in the command line will install the package locally on your computer:
 
-pip install git+https://github.com/NREL/Panel-Segmentation.git@master#egg=panel-segmentation
+git clone https://github.com/NatLabRockies/Panel-Segmentation.git
+cd Panel-Segmentation
+pip install .
 
 3. Panel-Segmentation requires the MMCV package, which can be tricky to install for CPU-only, and needs to be installed from source. To install MMCV for source, run the following in the command line:
 
