@@ -6,7 +6,6 @@ import numpy as np
 import open3d as o3d
 import pandas as pd
 import pyproj
-import os
 os.environ["OMP_NUM_THREADS"] = "1"
 
 example_path = os.path.join("panel_segmentation", "examples",
