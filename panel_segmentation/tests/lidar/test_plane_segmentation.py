@@ -6,9 +6,16 @@ import numpy as np
 import open3d as o3d
 import pandas as pd
 import pyproj
+os.environ["OMP_NUM_THREADS"] = "1"
 
 example_path = os.path.join("panel_segmentation", "examples",
                             "lidar_tilt_azimuth_detection_examples")
+
+
+ci_headless = pytest.mark.skipif(
+    os.environ.get("CI") == "true",
+    reason="open3d segment_plane segfaults in headless CI with open3d==0.18.0"
+)
 
 
 @pytest.fixture
@@ -84,6 +91,7 @@ def testSegmentPlanesTypeErrors(planeSegmentationClass):
         planeSegmentationClass.segmentPlanes(max_num_planes="10")
 
 
+@ci_headless
 def testSegmentPlanesResult(planeSegmentationClass):
     """
     Tests if a .plane_list attribute is created and a None value is returned
@@ -123,6 +131,7 @@ def testMergeSimilarPlanesTypeErrors(planeSegmentationClass):
             azimuth_diff_threshold="dsf4")
 
 
+@ci_headless
 def testMergeSimilarPlanesResult(planeSegmentationClass):
     """
     Tests if a new .plane_list attribute (with the merged planes) is created
@@ -148,6 +157,7 @@ def testMergeSimilarPlanesResult(planeSegmentationClass):
     assert result is None
 
 
+@ci_headless
 def testVisualizePlanesResult(planeSegmentationClass):
     """
     Tests if a list of o3d.geometry.TriangleMesh objects is returned after
@@ -195,6 +205,7 @@ def testCreateSummaryPlaneDataframeTypeErrors(planeSegmentationClass,
             source_crs=source_crs, scales=scales, offsets="[124, 5678, 91011]")
 
 
+@ci_headless
 def testCreateSummaryPlaneDataframeResult(planeSegmentationClass,
                                           pcdInfoParams):
     """
@@ -281,6 +292,7 @@ def testGetPlaneCentersResult(planeSegmentationClass, pcdInfoParams,
     assert isinstance(result[1], float)
 
 
+@ci_headless
 def testGetBestPlaneResult(planeSegmentationClass):
     """
     Tests if a dictionary of the best plane and a boolean flag to is found

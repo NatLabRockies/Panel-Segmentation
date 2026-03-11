@@ -9,6 +9,7 @@ Documentation
 - Updated Sphinx Documentation to account for new functions, features, installations, and other documentation updates. (:pull:`48`)
 - Added example gallery for the Mesh Scan, LiDAR, SOL-Searcher, Hail, and Hurricane Detection pipelines. (:pull:`48`)
 - Added Juypter Notebook tutorial to download and process MESH scans. (:pull:`44`)
+- Added Juypter Notebook tutorial for automated geotagging pipeline. (:pull:`53`)
 
 Scripts
 ~~~~~~~
@@ -22,7 +23,8 @@ Bug Fixes
 
 Other Changes
 ~~~~~~~~~~~~~
-- Updated setup.py and requirements.txt to include the new dependencies for Mesh Scan and LiDAR pipeline.
+- Updated setup.py and requirements.txt to include the new dependencies for Mesh Scan and LiDAR pipeline. (:pull:`44`)
+- Upgraded to pyproject.toml paradigm. (:pull:`54`)
 
 Contributors
 ~~~~~~~~~~~~
