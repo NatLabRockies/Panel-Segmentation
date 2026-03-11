@@ -17,6 +17,7 @@ ci_headless = pytest.mark.skipif(
     reason="open3d segment_plane segfaults in headless CI with open3d==0.18.0"
 )
 
+
 @pytest.fixture
 def planeSegmentationClass():
     """
