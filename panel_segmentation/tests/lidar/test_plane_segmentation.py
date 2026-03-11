@@ -31,6 +31,14 @@ def planeSegmentationClass():
     pcd.points = o3d.utility.Vector3dVector(point_clouds)
     # Initialize PlaneSegmentation class with pcd
     ps = PlaneSegmentation(pcd)
+    yield ps
+    # Force cleanup before GC does it
+    del ps.pcd
+    if hasattr(ps, 'plane_list'):
+        for plane in ps.plane_list:
+            del plane['pcd']
+    import gc
+    gc.collect()
     return ps
 
 

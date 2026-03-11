@@ -47,7 +47,7 @@ dependencies = [
     "beautifulsoup4==4.12",
     "dash==2.6.0",
     "laspy[laszip]==2.5.4",
-    "open3d==0.18.0",
+    "open3d==0.17.0",
     "pyarrow==17.0.0",
     "pyproj==3.5.0",
     "boto3>=1.37.38",
