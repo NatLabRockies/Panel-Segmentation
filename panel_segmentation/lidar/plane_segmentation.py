@@ -68,10 +68,13 @@ class PlaneSegmentation:
         current_pcd = self.pcd
         plane_count = 0
         # Create planes up to max number of planes
-        while plane_count <= max_num_planes:
+        max_iterations = max_num_planes * 5
+        total_iterations = 0
+        while plane_count <= max_num_planes and total_iterations < max_iterations:
+            total_iterations += 1
             # Stop loop if there's not enough points to create a plane with
             # the requested minimum points
-            if len(current_pcd.points) < min_plane_points:
+            if len(current_pcd.points) < max(min_plane_points, ransac_n + 1):
                 break
             # Use RANSAC algorithm to detect planes
             plane_model, inliers = current_pcd.segment_plane(

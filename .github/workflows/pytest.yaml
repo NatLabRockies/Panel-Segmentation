@@ -41,7 +41,10 @@ jobs:
         sudo apt-get install -y libgl1 
     - name: Install pytest
       run: |
-        pip install pytest
+        pip install pytest pytest-forked
     - name: Test with pytest ${{ matrix.env }}
+      env:
+        OMP_NUM_THREADS: "1"
+        OPEN3D_CPU_RENDERING: "true"
       run: |
-        pytest
+        pytest --forked
