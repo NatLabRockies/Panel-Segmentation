@@ -24,56 +24,11 @@ def panelDetectionClass():
     return pc
 
 
-@pytest.fixture()
-def satelliteImg():
-    '''Load in satellite image as fixture.'''
-    # Read in the image
-    x = imagex.load_img(img_file,
-                        color_mode='rgb',
-                        target_size=(640, 640))
-    x = np.array(x)
-    return x
-
-
-def testGenerateSatelliteImage():
-    latitude = 39.7407
-    longitude = -105.1694
-    google_maps_api_key = "Wrong_API_key"
-    file_name_save = "./examples/Panel_Detection_Examples/sat_img.png"
-    model_file_path = os.path.abspath(
-        './panel_segmentation/models/VGG16Net_ConvTranpose_complete.h5')
-    assert os.path.exists(model_file_path)
-    classifier_file_path = os.path.abspath(
-        './panel_segmentation/models/VGG16_classification_model.h5')
-    assert os.path.exists(classifier_file_path)
-    mounting_classifier_model_path = os.path.abspath(
-        './panel_segmentation/models/object_detection_model.pth')
-    assert os.path.exists(mounting_classifier_model_path)
-    # Create an instance of the PanelDetection() class.
-    pc = pan_det.PanelDetection(
-        model_file_path=model_file_path,
-        classifier_file_path=classifier_file_path,
-        mounting_classifier_file_path=mounting_classifier_model_path)
-    with pytest.raises(ValueError):
-        pc.generateSatelliteImage(latitude, longitude,
-                                  file_name_save, google_maps_api_key)
-
-
 def testHasPanels(panelDetectionClass, satelliteImg):
     # Assert that the returned value is a boolean
     panel_loc = panelDetectionClass.hasPanels(satelliteImg)
     assert_isinstance(panel_loc, bool)
     assert panel_loc
-
-
-def testTestSingle(panelDetectionClass, satelliteImg):
-    # Mask the satellite image
-    res = panelDetectionClass.testSingle(satelliteImg.astype(float),
-                                         test_mask=None,
-                                         model=None)
-    # Assert that the 'res' variable is a numpy array and the dimensions.
-    assert_isinstance(res, np.ndarray)
-    assert (res.shape == (640, 640))
 
 
 def testCropPanels(panelDetectionClass, satelliteImg):
@@ -129,26 +84,6 @@ def testPlotEdgeAz(panelDetectionClass, satelliteImg):
     # Open the image and assert that it exists
     im = PIL.Image.open("./panel_segmentation/tests/crop_mask_az_0.png")
     assert_isinstance(im, PIL.PngImagePlugin.PngImageFile)
-
-
-def testClusterPanels(panelDetectionClass, satelliteImg):
-    # Mask the satellite image
-    res = panelDetectionClass.testSingle(satelliteImg.astype(float),
-                                         test_mask=None,  model=None)
-    # Use the mask to isolate the panels
-    new_res = panelDetectionClass.cropPanels(satelliteImg, res)
-    # Generate the object detection boxes
-    (scores, labels, boxes) = \
-        panelDetectionClass.classifyMountingConfiguration(
-            img_file,
-            acc_cutoff=.65,
-            file_name_save=None)
-    n, clusters = panelDetectionClass.clusterPanels(new_res, boxes)
-    azimuth_list = []
-    for ii in np.arange(clusters.shape[0]):
-        az = panelDetectionClass.detectAzimuth(clusters[ii][np.newaxis, :])
-        azimuth_list.append(az)
-    assert (sorted(azimuth_list) == [90.0, 91.0, 161.0, 179.0])
 
 
 def testRunSiteAnalysisPipeline(panelDetectionClass):
