@@ -9,41 +9,6 @@ Panel Detection
 ---------------
 Generates satellite images and runs DL and CV routines on images to get array azimuth and mounting type/configuration.
 
-.. autosummary::
-   :toctree: generated/
-   :caption: Panel Detection
-
-   panel_detection.PanelDetection
-   panel_detection.PanelDetection.generateSatelliteImage
-   panel_detection.PanelDetection.classifyMountingConfiguration
-   panel_detection.PanelDetection.diceCoeff
-   panel_detection.PanelDetection.diceCoeffLoss
-   panel_detection.PanelDetection.testBatch
-   panel_detection.PanelDetection.testSingle
-   panel_detection.PanelDetection.hasPanels
-   panel_detection.PanelDetection.detectAzimuth
-   panel_detection.PanelDetection.cropPanels
-   panel_detection.PanelDetection.plotEdgeAz
-   panel_detection.PanelDetection.clusterPanels
-   panel_detection.PanelDetection.runSiteAnalysisPipeline
-
-Panel Training
----------------
-Deep learning model training and development tools.
-
-.. autosummary::
-   :toctree: generated/
-   :caption: Panel Training
-
-   panel_train.TrainPanelSegmentationModel
-   panel_train.TrainPanelSegmentationModel.loadImagesToNumpyArray
-   panel_train.TrainPanelSegmentationModel.diceCoeff
-   panel_train.TrainPanelSegmentationModel.diceCoeffLoss
-   panel_train.TrainPanelSegmentationModel.trainSegmentation
-   panel_train.TrainPanelSegmentationModel.trainPanelClassifier
-   panel_train.TrainPanelSegmentationModel.trainMountingConfigClassifier
-   panel_train.TrainPanelSegmentationModel.trainingStatistics
-
 
 Utilities
 ---------
@@ -64,6 +29,8 @@ Helper functions and utilities.
    utils.binaryMaskToPolygon
    utils.convertMaskToLatLonPolygon
    utils.convertPolygonToGeojson
+   utils.detectAzimuth
+   utils.plotEdgeAz
 
 LiDAR
 -----
