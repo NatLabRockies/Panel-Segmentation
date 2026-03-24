@@ -27,7 +27,7 @@ We are still working on making panel-segmentation available via PyPi, so enterin
 
 .. code-block:: console
 
-    git clone https://github.com/NREL/Panel-Segmentation.git@master#egg=panel-segmentation
+    git clone https://github.com/NatLabRockies/Panel-Segmentation.git
     cd Panel-Segmentation
     pip install .
 
