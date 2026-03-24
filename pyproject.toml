@@ -31,7 +31,7 @@ dependencies = [
     "matplotlib>=3.8.0",
     "requests>=2.22.0",
     "pandas>=2.2.3",
-    "Pillow>=8.0.1",
+    "Pillow>=10.3.0",
     "scikit_learn>=0.23.2",
     "h5py>=2.10.0",
     "torch>=1.9.0",
@@ -40,7 +40,7 @@ dependencies = [
     "mmengine==0.10.7",
     "kornia",
     "scipy",
-    "rasterio",
+    "rasterio>=1.3.10",
     "geopandas>=0.14.0",
     "beautifulsoup4==4.12",
     "laspy[laszip]==2.5.4",
@@ -51,6 +51,7 @@ dependencies = [
     "folium>=0.18.0",
     "simplekml>=1.3.6",
     "xarray>=2023.1.0",
+    "Shapely>=2.0.6"
 ]
 
 [project.optional-dependencies]
