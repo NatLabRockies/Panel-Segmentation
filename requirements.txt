@@ -9,7 +9,7 @@ matplotlib>=3.8.0
 numpy>=1.26,<3
 open3d==0.19.0
 opencv_python_headless>=4.10.0.84
-pandas==2.0.2
+pandas==2.2.3
 Pillow==10.2.0
 pyarrow==17.0.0
 pyproj==3.5.0
