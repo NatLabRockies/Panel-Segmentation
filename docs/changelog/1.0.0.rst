@@ -26,7 +26,7 @@ Other Changes
 ~~~~~~~~~~~~~
 - Updated setup.py and requirements.txt to include the new dependencies for Mesh Scan and LiDAR pipeline. (:pull:`44`)
 - Upgraded to pyproject.toml paradigm. (:pull:`54`)
-- Updated test harness to Python 3.11-3.13 from Python 3.8-3.10. (:pull:`56`)
+- Updated test harness to Python 3.10-3.12 from Python 3.8-3.10. (:pull:`56`)
 
 Contributors
 ~~~~~~~~~~~~
