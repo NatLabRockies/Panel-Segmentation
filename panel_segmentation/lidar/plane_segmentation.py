@@ -115,7 +115,7 @@ class PlaneSegmentation:
                 plane_count += 1
         return
 
-    def mergeSimilarPlanes(self, az_weight=1.0, tilt_weight=1.0, eps=0.75, min_samples=1):
+    def mergeSimilarPlanes(self, az_weight=1.0, tilt_weight=1.0, eps=0.5, min_samples=1):
         """
         Merge planes that are within similar tilt and azimuth threshold.
         Gets the mean tilt and azimuth of the combined planes.
