@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 project = 'Panel Segmentation'
 copyright = ''
-author = 'NREL PVP&R Team'
+author = 'NLR PV Reliability Team'
 
 version = release = panel_segmentation.__version__
 
@@ -192,7 +192,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'panel-segmentation.tex', 'panel-segmentation Documentation',
-     'NREL PVP\\&R Team', 'manual'),
+     'NREL PV Reliability Team', 'manual'),
 ]
 
 

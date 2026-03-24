@@ -5,10 +5,6 @@ API Reference
 The following gives a description of the classes and functions used in the Panel-Segmentation package.
 The main panel segmentation pipeline is used to detect solar panels in satellite imagery, using the pre-trained models provided in the Panel-Segmentation package.
 
-Panel Detection
----------------
-Generates satellite images and runs DL and CV routines on images to get array azimuth and mounting type/configuration.
-
 
 Utilities
 ---------
@@ -75,9 +71,8 @@ The following deep learning models are included in the Panel-Segmentation packag
 
 Panel Detection Models
 ----------------------
-* **VGG16_classification_model.h5**: This is the DL classifier model, which identifies if a solar array is detected in an image.
-* **VGG16Net_ConvTranpose_complete.h5**: This is the DL instance segmentation model, which identifies solar arrays in the image on a pixel-by-pixel basis.
-* **object_detection_model.pth**: This is the DL object detection model, which detects and classifies solar array mounting configuration.
+* **panel_detection_model.pth**: This is the configuration file for the DL instance segmentation panel detection model.
+* **panel_detection_model.py**: This is the DL isntance segmentation model, which detects and classifies solar array mounting configuration.
 * **sol_searcher_config.py**: This is the configuration file for the DL object detection sol-searcher model.
 * **sol_searcher_model.pth**: This is the checkpoint file for the DL object detection sol-searcher model, which searches for solar panels in satellite imagery.This model is trained on 3783 images from Google Maps imagery of the Austin, TX area from November 2023 and Denver, CO area from June 2023 with a resolution of 0.2986 meters per pixel (Google Maps zoom level 19). The architecture of the model is RTMDet-X with a mAP-50 score of 0.884.
 
@@ -92,3 +87,8 @@ Extreme Weather: Hurricane Models
 * **pre_hurricane_model.pth**: This is the checkpoint file for the DL instance segmentation pre-hurricane model, which detects solar arrays in pre-hurricane satellite imagery. This model is trained on 1883 images from Google Maps imagery of various areas before hurricane impact with a resolution of 0.0746 meters per pixel (Google Maps zoom level 21). Many of these images includes Puerto Rico. The architecture of this model is RTMDet-Ins-l with a mAP-50 score of 0.942.
 * **post_hurricane_config.py**: This is the configuration file for the DL instance segmentation post-hurricane model.
 * **post_hurricane_model.pth**: This is the checkpoint file for the DL instance segmentation post-hurricane model, which detects solar arrays in post-hurricane satellite imagery. This model is trained on 863 images from NOAA post-Hurricane Maria satellite imagery of the Puerto Rico area with a resolution of 0.0746 meters per pixel (Google Maps zoom level 21). The architecture of this model is Mask-RCNN X-101-64x4d-FPN with a mAP-50 score of 0.844.
+
+Automated Geotagging Models
+---------------------------
+* **automated_geotagging_config.py**: This is the configuration file for the DL instance segmentation automated geotagging model.
+* **automated_geotagging_model.pth**: This is the checkpoint file for the DL instance segmentation hail model, which detects site equipment in satellite imagery. This model is trained on utility PV sites with a resolution of 0.0746 meters per pixel (Google Maps zoom level 21). The architecture of the model is RTMDet-Ins-X with a mAP-50 score of 0.892.

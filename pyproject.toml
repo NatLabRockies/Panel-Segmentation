@@ -81,9 +81,6 @@ packages = ["panel_segmentation"]
 panel_segmentation = [
     "panel_segmentation/examples/*",
     "panel_segmentation/tests/*",
-    "panel_segmentation/models/VGG16Net_ConvTranpose_complete.h5",
-    "panel_segmentation/models/VGG16_classification_model.h5",
-    "panel_segmentation/models/object_detection_model.pth",
     "panel_segmentation/models/hail_config.py",
     "panel_segmentation/models/hail_model.pth",
     "panel_segmentation/models/post_hurricane_config.py",
@@ -92,6 +89,10 @@ panel_segmentation = [
     "panel_segmentation/models/pre_hurricane_model.pth",
     "panel_segmentation/models/sol_searcher_config.py",
     "panel_segmentation/models/sol_searcher_model.pth",
+    "panel_segmentation/models/automated_geotagging_config.py",
+    "panel_segmentation/models/automated_geotagging_model.pth",
+    "panel_segmentation/models/panel_detection_config.py",
+    "panel_segmentation/models/panel_detection_model.pth"
 ]
 
 [tool.versioneer]

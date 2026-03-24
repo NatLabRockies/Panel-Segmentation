@@ -1,8 +1,9 @@
 include versioneer.py
 include panel_segmentation/_version.py
-include panel_segmentation/models/VGG16_classification_model.h5
-include panel_segmentation/models/VGG16Net_ConvTranpose_complete.h5
-include panel_segmentation/models/object_detection_model.pth
+include panel_segmentation/models/automated_geotagging_config.py
+include panel_segmentation/models/automated_geotagging_model.pth
+include panel_segmentation/models/panel_detection_config.py
+include panel_segmentation/models/panel_detection_model.pth
 include panel_segmentation/models/hail_config.py
 include panel_segmentation/models/hail_model.pth
 include panel_segmentation/models/post_hurricane_config.py
