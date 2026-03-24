@@ -26,6 +26,7 @@ Once git lfs is installed, you can now install Panel-Segmentation on your comput
 We are still working on making panel-segmentation available via PyPi, so entering the following in the command line will install the package locally on your computer:
 
 .. code-block:: console
+
     git clone https://github.com/NREL/Panel-Segmentation.git@master#egg=panel-segmentation
     cd Panel-Segmentation
     pip install .
