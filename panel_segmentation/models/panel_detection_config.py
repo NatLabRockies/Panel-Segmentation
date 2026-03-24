@@ -210,8 +210,7 @@ test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
     batch_size=5,
     dataset=dict(
-        ann_file=
-        '/kfs2/projects/pvfleets24/repos/cv-dl-framework/test/label_json.json',
+        ann_file='/cv-dl-framework/test/label_json.json',
         backend_args=None,
         data_prefix=dict(
             img='/kfs2/projects/pvfleets24/repos/cv-dl-framework/test/images/'
@@ -260,8 +259,7 @@ test_dataloader = dict(
     persistent_workers=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 test_evaluator = dict(
-    ann_file=
-    '/kfs2/projects/pvfleets24/repos/cv-dl-framework/test/label_json.json',
+    ann_file='/cv-dl-framework/test/label_json.json',
     backend_args=None,
     format_only=False,
     metric=[
@@ -313,8 +311,7 @@ train_dataloader = dict(
     batch_sampler=None,
     batch_size=4,
     dataset=dict(
-        ann_file=
-        '/cv-dl-framework/train/label_json.json',
+        ann_file='/cv-dl-framework/train/label_json.json',
         backend_args=None,
         data_prefix=dict(
             img='/kfs2/projects/pvfleets24/repos/cv-dl-framework/train/images/'
@@ -564,8 +561,7 @@ val_cfg = dict(type='ValLoop')
 val_dataloader = dict(
     batch_size=5,
     dataset=dict(
-        ann_file=
-        '/kfs2/projects/pvfleets24/repos/cv-dl-framework/test/label_json.json',
+        ann_file='/cv-dl-framework/test/label_json.json',
         backend_args=None,
         data_prefix=dict(
             img='/kfs2/projects/pvfleets24/repos/cv-dl-framework/test/images/'
@@ -614,8 +610,7 @@ val_dataloader = dict(
     persistent_workers=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 val_evaluator = dict(
-    ann_file=
-    '/kfs2/projects/pvfleets24/repos/cv-dl-framework/test/label_json.json',
+    ann_file='/cv-dl-framework/test/label_json.json',
     backend_args=None,
     format_only=False,
     metric=[
@@ -636,8 +631,7 @@ visualizer = dict(
     type='DetLocalVisualizer',
     vis_backends=[
         dict(
-            save_dir=
-            '/12_03_2026_12_24_40',
+            save_dir='/12_03_2026_12_24_40',
             type='LocalVisBackend'),
     ])
 work_dir = '/12_03_2026_12_24_40'
