@@ -27,7 +27,9 @@ We are still working on making panel-segmentation available via PyPi, so enterin
 
 .. code-block:: console
 
-    pip install git+https://github.com/NREL/Panel-Segmentation.git@master#egg=panel-segmentation
+    git clone https://github.com/NREL/Panel-Segmentation.git@master#egg=panel-segmentation
+    cd Panel-Segmentation
+    pip install .
 
 3. Pip install mmcv
 ^^^^^^^^^^^^^^^^^^^

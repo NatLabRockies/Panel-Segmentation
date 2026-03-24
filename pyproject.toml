@@ -30,12 +30,10 @@ dependencies = [
     "scikit_image>=0.16.2",
     "matplotlib>=3.1.3",
     "requests>=2.22.0",
-    "tensorflow>=2.2.0",
     "pandas>=1.1.4",
     "Pillow>=8.0.1",
     "scikit_learn>=0.23.2",
     "h5py>=2.10.0",
-    "detecto>=1.2.1",
     "torch>=1.9.0",
     "torchvision>=0.10.0",
     "mmdet==3.3.0",
@@ -83,9 +81,6 @@ packages = ["panel_segmentation"]
 panel_segmentation = [
     "panel_segmentation/examples/*",
     "panel_segmentation/tests/*",
-    "panel_segmentation/models/VGG16Net_ConvTranpose_complete.h5",
-    "panel_segmentation/models/VGG16_classification_model.h5",
-    "panel_segmentation/models/object_detection_model.pth",
     "panel_segmentation/models/hail_config.py",
     "panel_segmentation/models/hail_model.pth",
     "panel_segmentation/models/post_hurricane_config.py",
@@ -94,6 +89,10 @@ panel_segmentation = [
     "panel_segmentation/models/pre_hurricane_model.pth",
     "panel_segmentation/models/sol_searcher_config.py",
     "panel_segmentation/models/sol_searcher_model.pth",
+    "panel_segmentation/models/automated_geotagging_config.py",
+    "panel_segmentation/models/automated_geotagging_model.pth",
+    "panel_segmentation/models/panel_detection_config.py",
+    "panel_segmentation/models/panel_detection_model.pth"
 ]
 
 [tool.versioneer]

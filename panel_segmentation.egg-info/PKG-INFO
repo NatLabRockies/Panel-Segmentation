@@ -1,0 +1,51 @@
+Metadata-Version: 2.4
+Name: panel_segmentation
+Version: 0.0.0
+Summary: A package to segment solar panels from a satellite image and perform automated metadata extraction.
+Author-email: Kirsten Perry <kirsten.perry@nrel.gov>, Quyen Nguyen <nguyquye@oregonstate.edu>, Kevin Anderson <kevin.anderson@snl.gov>, Christopher Campos <chris.acampos@yahoo.com>, Ayobami Edun <aedun@ufl.edu>
+License: MIT
+Project-URL: Homepage, https://github.com/NREL/Panel-Segmentation
+Keywords: photovoltaic,solar,analytics,analysis,performance,PV,satellite
+Requires-Python: >=3.8
+License-File: LICENSE
+Requires-Dist: opencv-python-headless==4.6.0.66
+Requires-Dist: numpy>=1.18.1
+Requires-Dist: scikit_image>=0.16.2
+Requires-Dist: matplotlib>=3.1.3
+Requires-Dist: requests>=2.22.0
+Requires-Dist: tensorflow>=2.2.0
+Requires-Dist: pandas>=1.1.4
+Requires-Dist: Pillow>=8.0.1
+Requires-Dist: scikit_learn>=0.23.2
+Requires-Dist: h5py>=2.10.0
+Requires-Dist: detecto>=1.2.1
+Requires-Dist: torch>=1.9.0
+Requires-Dist: torchvision>=0.10.0
+Requires-Dist: mmdet==3.3.0
+Requires-Dist: mmengine==0.10.7
+Requires-Dist: kornia
+Requires-Dist: scipy
+Requires-Dist: rasterio
+Requires-Dist: geopandas
+Requires-Dist: beautifulsoup4==4.12
+Requires-Dist: dash==2.6.0
+Requires-Dist: laspy[laszip]==2.5.4
+Requires-Dist: open3d==0.18.0
+Requires-Dist: pyarrow==17.0.0
+Requires-Dist: pyproj==3.5.0
+Requires-Dist: boto3>=1.37.38
+Requires-Dist: cfgrib>=0.9.15.0
+Requires-Dist: folium>=0.18.0
+Requires-Dist: simplekml>=1.3.6
+Requires-Dist: xarray>=2023.1.0
+Provides-Extra: doc
+Requires-Dist: sphinx==5.0; extra == "doc"
+Requires-Dist: jinja2<3.1; extra == "doc"
+Requires-Dist: pydata-sphinx-theme==0.14.0; extra == "doc"
+Requires-Dist: ipython; extra == "doc"
+Requires-Dist: nbsphinx; extra == "doc"
+Requires-Dist: sphinx_copybutton; extra == "doc"
+Provides-Extra: test
+Requires-Dist: pytest>=5.3.5; extra == "test"
+Provides-Extra: optional
+Dynamic: license-file

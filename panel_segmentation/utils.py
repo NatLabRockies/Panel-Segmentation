@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 from shapely.geometry import Polygon
 import geopandas
 from pyproj import Transformer
+from skimage.transform import hough_line, hough_line_peaks
 
 
 def generateSatelliteImage(latitude, longitude,
@@ -706,3 +707,118 @@ def convertPolygonToGeojson(polygon_coord_list):
     shapely_poly = Polygon(polygon_coord_list)
     geojson_poly = geopandas.GeoSeries(shapely_poly).to_json()
     return geojson_poly
+
+
+def detectAzimuth(mask, number_lines=4):
+    """
+    This function uses a Hough transform to detect the most dominant lines in
+    an image mask and the azimuth of the longest direction.
+
+    Parameters
+    -----------
+    mask: (nparray bool)
+        The mask containing the extracted solar panels set True, and other pixels set to False.
+        Dimension: (640, 640)
+    number_lines: (int)
+        This variable tells the function the number of dominant lines it should examine.
+        We currently inspect the top 10 lines.
+
+    Returns
+    -----------
+    azimuth: (int)
+        The azimuth of the panel in the image.
+    """
+    # Check that the input variables are of the correct type
+    if not isinstance(mask, np.ndarray):
+        raise TypeError("Variable mask must be of type Numpy ndarray.")
+    if not isinstance(number_lines, int):
+        raise TypeError("Variable number_lines must be of type int.")
+    # Run through the function
+    mask_uint8 = (mask * 255).astype(np.uint8)
+    edges = cv2.Canny(mask_uint8, 50, 150, apertureSize=3)
+    tested_angles = np.linspace(-np.pi / 2, np.pi / 2, 360)
+    h, theta, d = hough_line(edges, theta=tested_angles)
+    origin = np.array((0, edges.shape[1]))
+    ind = 0
+    azimuth = 0
+    az = np.zeros((number_lines))
+    for _, angle, dist in zip(*hough_line_peaks(
+            h, theta, d, num_peaks=number_lines,
+            threshold=0.25 * np.max(h))):
+        y0, y1 = (dist - origin * np.cos(angle)) / np.sin(angle)
+
+        deg_ang = int(np.rad2deg(angle))
+        if deg_ang >= 0:
+            az[ind] = 90+deg_ang
+        else:
+            az[ind] = 270 + deg_ang
+        ind = ind+1
+    unique_elements, counts_elements = np.unique(az, return_counts=True)
+    for _, angle, dist in zip(*hough_line_peaks(
+            h, theta, d, num_peaks=1,
+            threshold=0.25 * np.max(h))):
+        deg_ang = int(np.rad2deg(angle))
+        if deg_ang >= 0:
+            azimuth = 90 + deg_ang
+        else:
+            azimuth = 270 + deg_ang
+    return azimuth
+
+
+def plotEdgeAz(mask, no_lines=4,
+               save_img_file_path=None, plot_show=False):
+    """
+    Draws the Hough line in the dominant (longest) direction on a segmentation mask.
+    """
+    # Check that the input variables are of the correct type
+    if not isinstance(mask, np.ndarray):
+        raise TypeError("Variable mask must be of type Numpy ndarray.")
+    if not isinstance(no_lines, int):
+        raise TypeError("Variable no_lines must be of type int.")
+    if not isinstance(plot_show, bool):
+        raise TypeError("Variable no_figs must be of type boolean.")
+    mask_uint8 = (mask * 255).astype(np.uint8)
+    # Edge detection
+    edges = cv2.Canny(mask_uint8, 50, 150, apertureSize=3)
+    tested_angles = np.linspace(-np.pi / 2, np.pi / 2, 360)
+    h, theta, d = hough_line(edges, theta=tested_angles)
+    az = np.zeros((no_lines))
+    origin = np.array((0, edges.shape[1]))
+    ind = 0
+    # Generating figure 1
+    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+    ax.imshow(mask)  # cmap=cm.gray)
+    for _, angle, dist in zip(*hough_line_peaks(
+            h, theta, d, num_peaks=no_lines,
+            threshold=0.25 * np.max(h))):
+        y0, y1 = (dist - origin * np.cos(angle)) / np.sin(angle)
+        deg_ang = int(np.rad2deg(angle))
+        if deg_ang >= 0:
+            az[ind] = 90+deg_ang
+        else:
+            az[ind] = 270 + deg_ang
+        ind = ind+1
+        ax.plot(origin, (y0, y1), '-r')
+    ax.set_xlim(origin)
+    ax.set_ylim((edges.shape[0], 0))
+    ax.set_axis_off()
+    unique_elements, counts_elements = np.unique(az, return_counts=True)
+    for _, angle, dist in zip(*hough_line_peaks(
+            h, theta, d, num_peaks=1,
+            threshold=0.25 * np.max(h))):
+        deg_ang = int(np.rad2deg(angle))
+        if deg_ang >= 0:
+            azimuth = 90 + deg_ang
+        else:
+            azimuth = 270 + deg_ang
+    # print(np.asarray((unique_elements, counts_elements)))
+    ax.set_title('Azimuth = %i' % azimuth)
+    # save the image
+    if save_img_file_path is not None:
+        plt.savefig(save_img_file_path + '/crop_mask_az',
+                    dpi=300)
+    # Show the plot if plot_show is True
+    if plot_show is True:
+        plt.tight_layout()
+        plt.show()
+    return
