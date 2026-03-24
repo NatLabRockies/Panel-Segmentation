@@ -88,7 +88,7 @@ img_scales = [
 ]
 interval = 10
 launcher = 'none'
-load_from = '/kfs2/projects/pvfleets24/repos/cv-dl-framework/runs/panel_detection/12_03_2026_12_24_40/best_coco_bbox_mAP_50_epoch_291.pth'
+load_from = 'best_coco_bbox_mAP_50_epoch_291.pth'
 log_level = 'INFO'
 log_processor = dict(by_epoch=True, type='LogProcessor', window_size=50)
 max_epochs = 300
@@ -314,7 +314,7 @@ train_dataloader = dict(
     batch_size=4,
     dataset=dict(
         ann_file=
-        '/kfs2/projects/pvfleets24/repos/cv-dl-framework/train/label_json.json',
+        '/cv-dl-framework/train/label_json.json',
         backend_args=None,
         data_prefix=dict(
             img='/kfs2/projects/pvfleets24/repos/cv-dl-framework/train/images/'
@@ -637,7 +637,7 @@ visualizer = dict(
     vis_backends=[
         dict(
             save_dir=
-            '/kfs2/projects/pvfleets24/repos/cv-dl-framework/runs/panel_detection/12_03_2026_12_24_40',
+            '/12_03_2026_12_24_40',
             type='LocalVisBackend'),
     ])
-work_dir = '/kfs2/projects/pvfleets24/repos/cv-dl-framework/runs/panel_detection/12_03_2026_12_24_40'
+work_dir = '/12_03_2026_12_24_40'
