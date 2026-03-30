@@ -476,58 +476,49 @@ def locateLatLonGeotiff(geotiff_file, latitude, longitude,
                 the image, no PNG captured...""")
             return None
 
-
 def translateLatLongCoordinates(latitude, longitude,
                                 lat_translation_meters,
                                 long_translation_meters):
     """
-    Method to move any lat-lon coordinate by provided meters in lat and long
-    direction, and return the new latitude-longitude coordinates.
-
+    Vectorized translation - handles arrays of translations at once.
+    
     Parameters
-    -----------
-    latitude: float
-        Latitude coordinate of the site.
-    longitude: float
-        Longitude coordinate of the site.
-    lat_translation_meters: float
-        Movement of point in meters in latitude direction.If the value is
-        postive, translation moves up, if negative it moves down
-    long_translation_meters: float
-        Movement of point in meters in longitude direction. If the value is
-        postive, translation moves right, if negative it moves left
-
+    ----------
+    latitude, longitude : float
+        Center point coordinates
+    lat_translation_meters : array-like or float
+        Translation(s) in latitude direction
+    long_translation_meters : array-like or float
+        Translation(s) in longitude direction
+    
     Returns
     -------
-    (lat_new, long_new) : tuple
-        The (latitude, longitude) coordinates, post-translation.
+    coords : ndarray
+        (N, 2) array of (latitude, longitude) pairs
     """
-    # Ensure that the inputs are of the correct type
-    if not isinstance(latitude, float):
-        raise TypeError("latitude variable must be of type float.")
-    if not isinstance(longitude, float):
-        raise TypeError("longitude variable must be of type float.")
-    if not isinstance(lat_translation_meters, float):
-        raise TypeError("lat_translation_meters variable must be of" +
-                        " type float.")
-    if not isinstance(long_translation_meters, float):
-        raise TypeError("long_translation_meters variable must be of" +
-                        " type float.")
-    # Project center latitude, longitude (in "EPSG:4326") onto a local
-    # coordinate system to work in meters
-    local_crs = (f"+proj=aeqd +lat_0={latitude} +lon_0={longitude} +x_0=0 " +
-                 "+y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-    latlon_to_local = Transformer.from_crs("EPSG:4326", local_crs,
-                                           always_xy=True)
+    # Convert scalars to arrays for consistent handling
+    lat_trans = np.atleast_1d(lat_translation_meters)
+    lon_trans = np.atleast_1d(long_translation_meters)
+    
+    # Create transformer ONCE for all points
+    local_crs = (f"+proj=aeqd +lat_0={latitude} +lon_0={longitude} +x_0=0 "
+                 f"+y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+    
+    latlon_to_local = Transformer.from_crs("EPSG:4326", local_crs, always_xy=True)
+    local_to_latlon = Transformer.from_crs(local_crs, "EPSG:4326", always_xy=True)
+    
+    # Transform center point to local CRS
     m_lon, m_lat = latlon_to_local.transform(longitude, latitude)
-    # Apply meter translation
-    m_lon += long_translation_meters
-    m_lat += lat_translation_meters
-    # Convert local crs back to "EPSG:4326"
-    local_to_latlon = Transformer.from_crs(local_crs, "EPSG:4326",
-                                           always_xy=True)
-    long_new, lat_new = local_to_latlon.transform(m_lon, m_lat)
-    return lat_new, long_new
+    
+    # Apply translations (vectorized)
+    m_lons = m_lon + lon_trans
+    m_lats = m_lat + lat_trans
+    
+    # Transform all points back at once
+    lons_new, lats_new = local_to_latlon.transform(m_lons, m_lats)
+    
+    # Return as (N, 2) array
+    return np.column_stack([lats_new, lons_new])
 
 
 def getInferenceBoxLatLonCoordinates(box, img_center_lat, img_center_lon,
@@ -669,21 +660,21 @@ def convertMaskToLatLonPolygon(mask, img_center_lat,
         raise TypeError("zoom_level variable must be of type int.")
     # First convert the mask to a polygon (in pixel coordinates)
     polygon_coords = binaryMaskToPolygon(mask)
-    x_center, y_center = image_x_pixels/2, image_y_pixels/2
-    # Google maps pixel to meter conversion:
-    meter_pixel_conversion = 156543.03392 * \
-        np.cos(np.radians(img_center_lat)) / (2**zoom_level)
-    polygon_coord_list = list()
-    # Convert the polygon coords to lat-long coordinates
-    for coord in polygon_coords:
-        # Get distance changes in x- and y-directions in meters
-        dx = -(x_center - coord[0]) * meter_pixel_conversion
-        dy = (y_center - coord[1]) * meter_pixel_conversion
-        new_coords = translateLatLongCoordinates(img_center_lat,
-                                                 img_center_lon,
-                                                 dy, dx)[::-1]
-        polygon_coord_list.append(new_coords)
-    return polygon_coord_list
+    # Vectorized calculations
+    x_center = image_x_pixels / 2
+    y_center = image_y_pixels / 2
+    dx = -(x_center - polygon_coords[:, 0])
+    dy = (y_center - polygon_coords[:, 1])
+    meter_pixel_conversion = (156543.03392 * 
+                              np.cos(np.radians(img_center_lat)) / 
+                              (2 ** zoom_level))
+    dx_meters = dx * meter_pixel_conversion
+    dy_meters = dy * meter_pixel_conversion
+    # Return numpy array directly
+    return translateLatLongCoordinates(
+        img_center_lat, img_center_lon, 
+        dy_meters, dx_meters
+    )
 
 
 def convertPolygonToGeojson(polygon_coord_list):
