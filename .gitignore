@@ -13,3 +13,5 @@ generated
 
 venv/
 .idea/
+
+panel_segmentation.egg-info/
