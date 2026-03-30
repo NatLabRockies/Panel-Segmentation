@@ -16,8 +16,12 @@ panel_segmentation/lidar/__init__.py
 panel_segmentation/lidar/pcd_data.py
 panel_segmentation/lidar/plane_segmentation.py
 panel_segmentation/lidar/usgs_lidar_api.py
+panel_segmentation/models/automated_geotagging_config.py
+panel_segmentation/models/automated_geotagging_model.pth
 panel_segmentation/models/hail_config.py
 panel_segmentation/models/hail_model.pth
+panel_segmentation/models/panel_detection_config.py
+panel_segmentation/models/panel_detection_model.pth
 panel_segmentation/models/post_hurricane_config.py
 panel_segmentation/models/post_hurricane_model.pth
 panel_segmentation/models/pre_hurricane_config.py
@@ -26,5 +30,4 @@ panel_segmentation/models/sol_searcher_config.py
 panel_segmentation/models/sol_searcher_model.pth
 panel_segmentation/tests/README.md
 panel_segmentation/tests/__init__.py
-panel_segmentation/tests/test_panel_detection.py
 panel_segmentation/tests/test_utils.py

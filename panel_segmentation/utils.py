@@ -607,13 +607,12 @@ def binaryMaskToPolygon(mask):
     # Ensure the mask is binary
     binary_mask = (mask > 0).astype(np.uint8)
     # Find contours
-    contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL,
-                                   cv2.CHAIN_APPROX_SIMPLE)
-    contours_new = contours[0]
-    for idx in range(1, len(contours)):
-        contours_new = np.concatenate((contours_new, contours[idx]), axis=0)
-    contours_new = [tuple(x[0]) for x in contours_new]
-    return contours_new
+    contours, _ = cv2.findContours(binary_mask, 
+                                   cv2.RETR_EXTERNAL,
+                                   cv2.CHAIN_APPROX_TC89_L1) 
+    # Fast concatenation using vstack instead of loop
+    coords = np.vstack(contours).reshape(-1, 2)
+    return coords
 
 
 def convertMaskToLatLonPolygon(mask, img_center_lat,
@@ -671,10 +670,12 @@ def convertMaskToLatLonPolygon(mask, img_center_lat,
     dx_meters = dx * meter_pixel_conversion
     dy_meters = dy * meter_pixel_conversion
     # Return numpy array directly
-    return translateLatLongCoordinates(
-        img_center_lat, img_center_lon, 
-        dy_meters, dx_meters
-    )
+    polygon_lat_lon_coords = translateLatLongCoordinates(
+                        img_center_lat, img_center_lon, 
+                        dy_meters, dx_meters
+                        )
+    polygon_lat_lon_coords = [(y,x) for x, y in polygon_lat_lon_coords]
+    return polygon_lat_lon_coords
 
 
 def convertPolygonToGeojson(polygon_coord_list):
