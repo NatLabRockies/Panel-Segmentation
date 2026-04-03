@@ -6,7 +6,7 @@ Automated metadata extraction for solar PV installations using satellite imagery
 
 [![Build Status](https://github.com/NREL/Panel-Segmentation/actions/workflows/pytest.yaml/badge.svg)](https://github.com/NREL/Panel-Segmentation/actions)
 [![Documentation Status](https://readthedocs.org/projects/panel-segmentation/badge/?version=latest)](https://panel-segmentation.readthedocs.io/en/latest/)
-[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/mit)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
