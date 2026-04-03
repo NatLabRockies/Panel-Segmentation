@@ -147,7 +147,7 @@ def convertMaskToLatLonPolygonParams():
     zoom_level = 18
     return mask, img_center_lat, img_center_lon, image_x_pixels, \
         image_y_pixels, zoom_level
-        
+
 
 @pytest.fixture
 def detectAzimuthParams():

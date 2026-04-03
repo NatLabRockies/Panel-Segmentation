@@ -476,12 +476,13 @@ def locateLatLonGeotiff(geotiff_file, latitude, longitude,
                 the image, no PNG captured...""")
             return None
 
+
 def translateLatLongCoordinates(latitude, longitude,
                                 lat_translation_meters,
                                 long_translation_meters):
     """
     Vectorized translation - handles arrays of translations at once.
-    
+
     Parameters
     ----------
     latitude, longitude : float
@@ -490,7 +491,7 @@ def translateLatLongCoordinates(latitude, longitude,
         Translation(s) in latitude direction
     long_translation_meters : array-like or float
         Translation(s) in longitude direction
-    
+
     Returns
     -------
     coords : ndarray
@@ -501,33 +502,37 @@ def translateLatLongCoordinates(latitude, longitude,
         raise TypeError("latitude variable must be of type float.")
     if not isinstance(longitude, float):
         raise TypeError("longitude variable must be of type float.")
-    if not (isinstance(lat_translation_meters, float) | isinstance(lat_translation_meters, np.ndarray)):
+    if not (isinstance(lat_translation_meters, float) |
+            isinstance(lat_translation_meters, np.ndarray)):
         raise TypeError("lat_translation_meters variable must be of" +
                         " type float.")
-    if not (isinstance(long_translation_meters, float) | isinstance(long_translation_meters, np.ndarray)):
+    if not (isinstance(long_translation_meters, float) |
+            isinstance(long_translation_meters, np.ndarray)):
         raise TypeError("long_translation_meters variable must be of" +
                         " type float.")
     # Convert scalars to arrays for consistent handling
     lat_trans = np.atleast_1d(lat_translation_meters)
     lon_trans = np.atleast_1d(long_translation_meters)
-    
+
     # Create transformer ONCE for all points
     local_crs = (f"+proj=aeqd +lat_0={latitude} +lon_0={longitude} +x_0=0 "
                  f"+y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-    
-    latlon_to_local = Transformer.from_crs("EPSG:4326", local_crs, always_xy=True)
-    local_to_latlon = Transformer.from_crs(local_crs, "EPSG:4326", always_xy=True)
-    
+
+    latlon_to_local = Transformer.from_crs(
+        "EPSG:4326", local_crs, always_xy=True)
+    local_to_latlon = Transformer.from_crs(
+        local_crs, "EPSG:4326", always_xy=True)
+
     # Transform center point to local CRS
     m_lon, m_lat = latlon_to_local.transform(longitude, latitude)
-    
+
     # Apply translations (vectorized)
     m_lons = m_lon + lon_trans
     m_lats = m_lat + lat_trans
-    
+
     # Transform all points back at once
     lons_new, lats_new = local_to_latlon.transform(m_lons, m_lats)
-    
+
     # Return as (N, 2) array
     return np.column_stack([lats_new, lons_new])
 
@@ -592,7 +597,7 @@ def getInferenceBoxLatLonCoordinates(box, img_center_lat, img_center_lon,
         longitude=img_center_lon,
         lat_translation_meters=lat_translation_meters,
         long_translation_meters=lon_translation_meters)
-    polygon_lat_lon_coords = [(y,x) for x, y in polygon_lat_lon_coords][0]
+    polygon_lat_lon_coords = [(y, x) for x, y in polygon_lat_lon_coords][0]
     return polygon_lat_lon_coords
 
 
@@ -619,7 +624,7 @@ def binaryMaskToPolygon(mask):
     # Ensure the mask is binary
     binary_mask = (mask > 0).astype(np.uint8)
     # Find contours
-    contours, _ = cv2.findContours(binary_mask, 
+    contours, _ = cv2.findContours(binary_mask,
                                    cv2.RETR_EXTERNAL,
                                    cv2.CHAIN_APPROX_SIMPLE)
     # Fast concatenation using vstack instead of loop
@@ -676,17 +681,17 @@ def convertMaskToLatLonPolygon(mask, img_center_lat,
     y_center = image_y_pixels / 2
     dx = -(x_center - polygon_coords[:, 0])
     dy = (y_center - polygon_coords[:, 1])
-    meter_pixel_conversion = (156543.03392 * 
-                              np.cos(np.radians(img_center_lat)) / 
+    meter_pixel_conversion = (156543.03392 *
+                              np.cos(np.radians(img_center_lat)) /
                               (2 ** zoom_level))
     dx_meters = dx * meter_pixel_conversion
     dy_meters = dy * meter_pixel_conversion
     # Return numpy array directly
     polygon_lat_lon_coords = translateLatLongCoordinates(
-                        img_center_lat, img_center_lon, 
-                        dy_meters, dx_meters
-                        )
-    polygon_lat_lon_coords = [(y,x) for x, y in polygon_lat_lon_coords]
+        img_center_lat, img_center_lon,
+        dy_meters, dx_meters
+    )
+    polygon_lat_lon_coords = [(y, x) for x, y in polygon_lat_lon_coords]
     return polygon_lat_lon_coords
 
 
@@ -725,7 +730,7 @@ def detectAzimuth(mask, number_lines=4):
         and other pixels set to False.
         Dimension: (640, 640)
     number_lines: (int)
-        This variable tells the function the number of dominant 
+        This variable tells the function the number of dominant
         lines it should examine. Default set to 4.
 
     Returns
@@ -773,16 +778,17 @@ def detectAzimuth(mask, number_lines=4):
 def plotEdgeAz(mask, no_lines=4,
                save_img_file_path=None, plot_show=False):
     """
-    Draws the Hough line in the dominant (longest) direction on a segmentation mask.
-    
+    Draws the Hough line in the dominant (longest) direction on a
+    segmentation mask.
+
     Parameters
     -----------
     mask: (nparray bool)
-        The mask containing the extracted solar panels set True, and other pixels set to False.
-        Dimension: (640, 640)
+        The mask containing the extracted solar panels set True, and other
+        pixels set to False.  Dimension: (640, 640)
     number_lines: (int)
-        This variable tells the function the number of dominant lines it should examine.
-        We currently inspect the top 10 lines.
+        This variable tells the function the number of dominant lines it
+        should examine. We currently inspect the top 4 lines.
     save_img_file_path: (string or None)
         Optional field where, if set, the assocaited output image is saved
         under the given path
@@ -851,7 +857,7 @@ def getRectangleDimensions(polygon):
     """
     Calculate the width and length of a rectangular polygon.
     Returns the two edge lengths and their orientations.
-    
+
     Parameters
     -----------
     polygon: (shapely.geometry.Polygon)
@@ -861,25 +867,25 @@ def getRectangleDimensions(polygon):
     Returns
     -----------
     dictionary or None:
-        Dictionary object with fields for the width, length, and associated angles
-        of the mask. If not a rectangle, returns None
+        Dictionary object with fields for the width, length, and
+        associated angles of the mask. If not a rectangle, returns None
     """
     # Check that the input variables are of the correct type
     if not isinstance(polygon, Polygon):
         raise TypeError("Variable polygon must be of type Shapely polygon.")
     coords = list(polygon.exterior.coords)[:-1]  # Remove duplicate last point
-    
+
     # Calculate distances between consecutive vertices
     edges = []
     for i in range(len(coords)):
         p1 = np.array(coords[i])
         p2 = np.array(coords[(i + 1) % len(coords)])
-        
+
         # Calculate edge vector and length
         edge_vector = p2 - p1
         edge_length = np.linalg.norm(edge_vector)
         edge_angle = np.arctan2(edge_vector[1], edge_vector[0])
-        
+
         edges.append({
             'length': edge_length,
             'angle': edge_angle,
@@ -887,27 +893,25 @@ def getRectangleDimensions(polygon):
             'start': p1,
             'end': p2
         })
-    
+
     # Group opposite edges (should be parallel and equal length in a rectangle)
     # For a 4-sided polygon, opposite edges are at indices 0-2 and 1-3
     if len(edges) == 4:
         edge1_length = edges[0]['length']
         edge2_length = edges[1]['length']
-        
+
         # Determine which is width (shorter) and which is length (longer)
         if edge1_length < edge2_length:
             width = edge1_length
             length = edge2_length
             width_angle = edges[0]['angle']
             length_angle = edges[1]['angle']
-            width_edge_idx = 0
         else:
             width = edge2_length
             length = edge1_length
             width_angle = edges[1]['angle']
             length_angle = edges[0]['angle']
-            width_edge_idx = 1
-            
+
         return {
             'width': width,
             'length': length,
@@ -922,7 +926,7 @@ def standardizeRectangleWidth(polygon, target_width):
     """
     Adjust a rectangular polygon to have a standardized width while
     maintaining its center position, orientation, and length.
-    
+
     Parameters
     -----------
     polygon: (shapely.geometry.Polygon)
@@ -939,36 +943,35 @@ def standardizeRectangleWidth(polygon, target_width):
         raise TypeError("Variable polygon must be of type Shapely polygon.")
     if not isinstance(target_width, float):
         raise TypeError("Variable targrt_width must be of type float.")
-    
+
     dims = getRectangleDimensions(polygon)
     if dims is None:
         return polygon
-    
+
     # Get the center of the polygon
     centroid = polygon.centroid
     center = np.array([centroid.x, centroid.y])
-    
+
     # Calculate the length direction (perpendicular to width)
     length_angle = dims['length_angle']
     width_angle = dims['width_angle']
-    
+
     # Unit vectors for length and width directions
     length_dir = np.array([np.cos(length_angle), np.sin(length_angle)])
     width_dir = np.array([np.cos(width_angle), np.sin(width_angle)])
-    
+
     # Half dimensions
     half_length = dims['length'] / 2.0
     half_width = target_width / 2.0
-    
+
     # Create new rectangle centered at the centroid
-    # The four corners are: center ± half_length * length_dir ± half_width * width_dir
+    # The four corners are: center ± half_length * length_dir ±
+    # half_width * width_dir
     corners = [
         center + half_length * length_dir + half_width * width_dir,
         center + half_length * length_dir - half_width * width_dir,
         center - half_length * length_dir - half_width * width_dir,
         center - half_length * length_dir + half_width * width_dir,
-        center + half_length * length_dir + half_width * width_dir,  # Close the polygon
+        center + half_length * length_dir + half_width * width_dir,
     ]
-    
     return Polygon(corners)
-
