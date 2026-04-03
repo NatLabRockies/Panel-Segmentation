@@ -4,10 +4,9 @@
 
 Automated metadata extraction for solar PV installations using satellite imagery and computer vision.
 
-[![PyPI version](https://badge.fury.io/py/panel-segmentation.svg)](https://badge.fury.io/py/panel-segmentation)
 [![Build Status](https://github.com/NREL/Panel-Segmentation/actions/workflows/pytest.yaml/badge.svg)](https://github.com/NREL/Panel-Segmentation/actions)
 [![Documentation Status](https://readthedocs.org/projects/panel-segmentation/badge/?version=latest)](https://panel-segmentation.readthedocs.io/en/latest/)
-[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/mit)
 
 ---
 
@@ -54,7 +53,7 @@ pip install .
 
 ### Install MMCV (required for storm damage models)
 
-The storm-related CV models depend on MMCV, which must be built from source:
+All CV models depend on MMCV, which must be built from source:
 
 ```bash
 pip install git+https://github.com/open-mmlab/mmcv.git@v2.1.0
@@ -78,7 +77,9 @@ Contributions are welcome. Please open an issue or pull request on [GitHub](http
 
 ## Citation
 
-If you use Panel-Segmentation in your research, please cite it using the information in [`CITATION.cff`](CITATION.cff).
+If you use Panel-Segmentation in your research, please cite it using the following citation:
+
+K. Perry and C. Campos, "Panel Segmentation: A Python Package for Automated Solar Array Metadata Extraction Using Satellite Imagery," in IEEE Journal of Photovoltaics, vol. 13, no. 2, pp. 208-212, March 2023, doi: 10.1109/JPHOTOV.2022.3230565.
 
 ---
 
