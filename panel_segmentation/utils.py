@@ -599,8 +599,8 @@ def binaryMaskToPolygon(mask):
 
     Returns
     -------
-    contours_new : list
-        A list of (x,y) image pixel-coordinate tuples for a polygon.
+    contours_new : nparray
+        Array of (x,y) image pixel-coordinate arrays for a polygon.
     """
     # Ensure that the input are of the correct type
     if not isinstance(mask, np.ndarray):

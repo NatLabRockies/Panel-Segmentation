@@ -569,12 +569,12 @@ def testTranslateLatLongCoordinatesTypeOutput(translateLatLongCoordsParams):
     """
     latitude, longitude, lat_translation_meters, \
         long_translation_meters = translateLatLongCoordsParams
-    actual_lat, actual_lon = utils.translateLatLongCoordinates(
+    lat_lon_coords = utils.translateLatLongCoordinates(
         latitude, longitude, lat_translation_meters, long_translation_meters)
     # Assert actual_lat is a float
-    assert isinstance(actual_lat, float)
+    assert isinstance(lat_lon_coords[0][0], float)
     # Assert actual_lon is a float
-    assert isinstance(actual_lon, float)
+    assert isinstance(lat_lon_coords[0][1], float)
 
 
 def testGetInferenceBoxLatLonCoordinatesTypeErrors(
@@ -664,12 +664,12 @@ def testBinaryMaskToPolygonOutput():
     mask[1:3, 1:3] = 1
     polygon_contours = utils.binaryMaskToPolygon(mask)
     # Assert that polygon_contours is a list
-    assert isinstance(polygon_contours, list)
+    assert isinstance(polygon_contours, np.ndarray)
     # Assert that polygon_contours is of length 4 (a square) from mask
     assert len(polygon_contours) == 4
     for coordinates in polygon_contours:
         # Assert that the coordinates inside polygon_coutours is a tuple
-        assert isinstance(coordinates, tuple)
+        assert isinstance(coordinates,  np.ndarray)
         # Assert that the coordinates is a tuple is length 2 (x,y)
         assert len(coordinates) == 2
 
