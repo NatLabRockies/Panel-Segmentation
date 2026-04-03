@@ -496,6 +496,17 @@ def translateLatLongCoordinates(latitude, longitude,
     coords : ndarray
         (N, 2) array of (latitude, longitude) pairs
     """
+    # Ensure that the inputs are of the correct type
+    if not isinstance(latitude, float):
+        raise TypeError("latitude variable must be of type float.")
+    if not isinstance(longitude, float):
+        raise TypeError("longitude variable must be of type float.")
+    if not isinstance(lat_translation_meters, float):
+        raise TypeError("lat_translation_meters variable must be of" +
+                        " type float.")
+    if not isinstance(long_translation_meters, float):
+        raise TypeError("long_translation_meters variable must be of" +
+                        " type float.")
     # Convert scalars to arrays for consistent handling
     lat_trans = np.atleast_1d(lat_translation_meters)
     lon_trans = np.atleast_1d(long_translation_meters)
@@ -710,11 +721,12 @@ def detectAzimuth(mask, number_lines=4):
     Parameters
     -----------
     mask: (nparray bool)
-        The mask containing the extracted solar panels set True, and other pixels set to False.
+        The mask containing the extracted solar panels set True,
+        and other pixels set to False.
         Dimension: (640, 640)
     number_lines: (int)
-        This variable tells the function the number of dominant lines it should examine.
-        We currently inspect the top 10 lines.
+        This variable tells the function the number of dominant 
+        lines it should examine. Default set to 4.
 
     Returns
     -----------
@@ -762,6 +774,24 @@ def plotEdgeAz(mask, no_lines=4,
                save_img_file_path=None, plot_show=False):
     """
     Draws the Hough line in the dominant (longest) direction on a segmentation mask.
+    
+    Parameters
+    -----------
+    mask: (nparray bool)
+        The mask containing the extracted solar panels set True, and other pixels set to False.
+        Dimension: (640, 640)
+    number_lines: (int)
+        This variable tells the function the number of dominant lines it should examine.
+        We currently inspect the top 10 lines.
+    save_img_file_path: (string or None)
+        Optional field where, if set, the assocaited output image is saved
+        under the given path
+    plot_show: (boolean)
+        Show the generated output plot in the console.
+
+    Returns
+    -----------
+    Plot is generated in console or saved, based on params passed
     """
     # Check that the input variables are of the correct type
     if not isinstance(mask, np.ndarray):
@@ -821,7 +851,22 @@ def getRectangleDimensions(polygon):
     """
     Calculate the width and length of a rectangular polygon.
     Returns the two edge lengths and their orientations.
+    
+    Parameters
+    -----------
+    polygon: (shapely.geometry.Polygon)
+        Rectangular polygon that we want to calculate the width, length, and
+        associated angles for
+
+    Returns
+    -----------
+    dictionary or None:
+        Dictionary object with fields for the width, length, and associated angles
+        of the mask. If not a rectangle, returns None
     """
+    # Check that the input variables are of the correct type
+    if not isinstance(polygon, Polygon):
+        raise TypeError("Variable polygon must be of type Shapely polygon.")
     coords = list(polygon.exterior.coords)[:-1]  # Remove duplicate last point
     
     # Calculate distances between consecutive vertices
@@ -869,15 +914,32 @@ def getRectangleDimensions(polygon):
             'width_angle': width_angle,
             'length_angle': length_angle
         }
-    
-    return None
+    else:
+        return None
 
 
 def standardizeRectangleWidth(polygon, target_width):
     """
     Adjust a rectangular polygon to have a standardized width while
     maintaining its center position, orientation, and length.
+    
+    Parameters
+    -----------
+    polygon: (shapely.geometry.Polygon)
+        Rectangular polygon that has a non-standardized width (tracker row or
+        fixed-tilt row)
+    target_width: (float)
+        target width of the row. Normally determined via finding the median
+        row width across all masks.
+    Returns
+    -----------
+    Shapely polygon representing the newly standardized rectangle mask
     """
+    if not isinstance(polygon, Polygon):
+        raise TypeError("Variable polygon must be of type Shapely polygon.")
+    if not isinstance(target_width, float):
+        raise TypeError("Variable targrt_width must be of type float.")
+    
     dims = getRectangleDimensions(polygon)
     if dims is None:
         return polygon
