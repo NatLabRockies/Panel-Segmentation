@@ -27,6 +27,8 @@ Helper functions and utilities.
    utils.convertPolygonToGeojson
    utils.detectAzimuth
    utils.plotEdgeAz
+   utils.getRectangleDimensions
+   utils.standardizeRectangleWidth
 
 LiDAR
 -----

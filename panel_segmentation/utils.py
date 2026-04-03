@@ -481,53 +481,60 @@ def translateLatLongCoordinates(latitude, longitude,
                                 lat_translation_meters,
                                 long_translation_meters):
     """
-    Method to move any lat-lon coordinate by provided meters in lat and long
-    direction, and return the new latitude-longitude coordinates.
+    Vectorized translation - handles arrays of translations at once.
 
     Parameters
-    -----------
-    latitude: float
-        Latitude coordinate of the site.
-    longitude: float
-        Longitude coordinate of the site.
-    lat_translation_meters: float
-        Movement of point in meters in latitude direction.If the value is
-        postive, translation moves up, if negative it moves down
-    long_translation_meters: float
-        Movement of point in meters in longitude direction. If the value is
-        postive, translation moves right, if negative it moves left
+    ----------
+    latitude, longitude : float
+        Center point coordinates
+    lat_translation_meters : array-like or float
+        Translation(s) in latitude direction
+    long_translation_meters : array-like or float
+        Translation(s) in longitude direction
 
     Returns
     -------
-    (lat_new, long_new) : tuple
-        The (latitude, longitude) coordinates, post-translation.
+    coords : ndarray
+        (N, 2) array of (latitude, longitude) pairs
     """
     # Ensure that the inputs are of the correct type
     if not isinstance(latitude, float):
         raise TypeError("latitude variable must be of type float.")
     if not isinstance(longitude, float):
         raise TypeError("longitude variable must be of type float.")
-    if not isinstance(lat_translation_meters, float):
+    if not (isinstance(lat_translation_meters, float) |
+            isinstance(lat_translation_meters, np.ndarray)):
         raise TypeError("lat_translation_meters variable must be of" +
                         " type float.")
-    if not isinstance(long_translation_meters, float):
+    if not (isinstance(long_translation_meters, float) |
+            isinstance(long_translation_meters, np.ndarray)):
         raise TypeError("long_translation_meters variable must be of" +
                         " type float.")
-    # Project center latitude, longitude (in "EPSG:4326") onto a local
-    # coordinate system to work in meters
-    local_crs = (f"+proj=aeqd +lat_0={latitude} +lon_0={longitude} +x_0=0 " +
-                 "+y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-    latlon_to_local = Transformer.from_crs("EPSG:4326", local_crs,
-                                           always_xy=True)
+    # Convert scalars to arrays for consistent handling
+    lat_trans = np.atleast_1d(lat_translation_meters)
+    lon_trans = np.atleast_1d(long_translation_meters)
+
+    # Create transformer ONCE for all points
+    local_crs = (f"+proj=aeqd +lat_0={latitude} +lon_0={longitude} +x_0=0 "
+                 f"+y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+
+    latlon_to_local = Transformer.from_crs(
+        "EPSG:4326", local_crs, always_xy=True)
+    local_to_latlon = Transformer.from_crs(
+        local_crs, "EPSG:4326", always_xy=True)
+
+    # Transform center point to local CRS
     m_lon, m_lat = latlon_to_local.transform(longitude, latitude)
-    # Apply meter translation
-    m_lon += long_translation_meters
-    m_lat += lat_translation_meters
-    # Convert local crs back to "EPSG:4326"
-    local_to_latlon = Transformer.from_crs(local_crs, "EPSG:4326",
-                                           always_xy=True)
-    long_new, lat_new = local_to_latlon.transform(m_lon, m_lat)
-    return lat_new, long_new
+
+    # Apply translations (vectorized)
+    m_lons = m_lon + lon_trans
+    m_lats = m_lat + lat_trans
+
+    # Transform all points back at once
+    lons_new, lats_new = local_to_latlon.transform(m_lons, m_lats)
+
+    # Return as (N, 2) array
+    return np.column_stack([lats_new, lons_new])
 
 
 def getInferenceBoxLatLonCoordinates(box, img_center_lat, img_center_lon,
@@ -585,12 +592,13 @@ def getInferenceBoxLatLonCoordinates(box, img_center_lat, img_center_lon,
                               meter_pixel_conversion)
     lat_translation_meters = ((image_center_pixels_y - cy) *
                               meter_pixel_conversion)
-    box_lat, box_lon = translateLatLongCoordinates(
+    polygon_lat_lon_coords = translateLatLongCoordinates(
         latitude=img_center_lat,
         longitude=img_center_lon,
         lat_translation_meters=lat_translation_meters,
         long_translation_meters=lon_translation_meters)
-    return (box_lat, box_lon)
+    polygon_lat_lon_coords = [(y, x) for x, y in polygon_lat_lon_coords][0]
+    return polygon_lat_lon_coords
 
 
 def binaryMaskToPolygon(mask):
@@ -607,8 +615,8 @@ def binaryMaskToPolygon(mask):
 
     Returns
     -------
-    contours_new : list
-        A list of (x,y) image pixel-coordinate tuples for a polygon.
+    contours_new : nparray
+        Array of (x,y) image pixel-coordinate arrays for a polygon.
     """
     # Ensure that the input are of the correct type
     if not isinstance(mask, np.ndarray):
@@ -616,13 +624,12 @@ def binaryMaskToPolygon(mask):
     # Ensure the mask is binary
     binary_mask = (mask > 0).astype(np.uint8)
     # Find contours
-    contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL,
+    contours, _ = cv2.findContours(binary_mask,
+                                   cv2.RETR_EXTERNAL,
                                    cv2.CHAIN_APPROX_SIMPLE)
-    contours_new = contours[0]
-    for idx in range(1, len(contours)):
-        contours_new = np.concatenate((contours_new, contours[idx]), axis=0)
-    contours_new = [tuple(x[0]) for x in contours_new]
-    return contours_new
+    # Fast concatenation using vstack instead of loop
+    coords = np.vstack(contours).reshape(-1, 2)
+    return coords
 
 
 def convertMaskToLatLonPolygon(mask, img_center_lat,
@@ -669,21 +676,23 @@ def convertMaskToLatLonPolygon(mask, img_center_lat,
         raise TypeError("zoom_level variable must be of type int.")
     # First convert the mask to a polygon (in pixel coordinates)
     polygon_coords = binaryMaskToPolygon(mask)
-    x_center, y_center = image_x_pixels/2, image_y_pixels/2
-    # Google maps pixel to meter conversion:
-    meter_pixel_conversion = 156543.03392 * \
-        np.cos(np.radians(img_center_lat)) / (2**zoom_level)
-    polygon_coord_list = list()
-    # Convert the polygon coords to lat-long coordinates
-    for coord in polygon_coords:
-        # Get distance changes in x- and y-directions in meters
-        dx = -(x_center - coord[0]) * meter_pixel_conversion
-        dy = (y_center - coord[1]) * meter_pixel_conversion
-        new_coords = translateLatLongCoordinates(img_center_lat,
-                                                 img_center_lon,
-                                                 dy, dx)[::-1]
-        polygon_coord_list.append(new_coords)
-    return polygon_coord_list
+    # Vectorized calculations
+    x_center = image_x_pixels / 2
+    y_center = image_y_pixels / 2
+    dx = -(x_center - polygon_coords[:, 0])
+    dy = (y_center - polygon_coords[:, 1])
+    meter_pixel_conversion = (156543.03392 *
+                              np.cos(np.radians(img_center_lat)) /
+                              (2 ** zoom_level))
+    dx_meters = dx * meter_pixel_conversion
+    dy_meters = dy * meter_pixel_conversion
+    # Return numpy array directly
+    polygon_lat_lon_coords = translateLatLongCoordinates(
+        img_center_lat, img_center_lon,
+        dy_meters, dx_meters
+    )
+    polygon_lat_lon_coords = [(y, x) for x, y in polygon_lat_lon_coords]
+    return polygon_lat_lon_coords
 
 
 def convertPolygonToGeojson(polygon_coord_list):
@@ -717,11 +726,12 @@ def detectAzimuth(mask, number_lines=4):
     Parameters
     -----------
     mask: (nparray bool)
-        The mask containing the extracted solar panels set True, and other pixels set to False.
+        The mask containing the extracted solar panels set True,
+        and other pixels set to False.
         Dimension: (640, 640)
     number_lines: (int)
-        This variable tells the function the number of dominant lines it should examine.
-        We currently inspect the top 10 lines.
+        This variable tells the function the number of dominant
+        lines it should examine. Default set to 4.
 
     Returns
     -----------
@@ -768,7 +778,26 @@ def detectAzimuth(mask, number_lines=4):
 def plotEdgeAz(mask, no_lines=4,
                save_img_file_path=None, plot_show=False):
     """
-    Draws the Hough line in the dominant (longest) direction on a segmentation mask.
+    Draws the Hough line in the dominant (longest) direction on a
+    segmentation mask.
+
+    Parameters
+    -----------
+    mask: (nparray bool)
+        The mask containing the extracted solar panels set True, and other
+        pixels set to False.  Dimension: (640, 640)
+    number_lines: (int)
+        This variable tells the function the number of dominant lines it
+        should examine. We currently inspect the top 4 lines.
+    save_img_file_path: (string or None)
+        Optional field where, if set, the assocaited output image is saved
+        under the given path
+    plot_show: (boolean)
+        Show the generated output plot in the console.
+
+    Returns
+    -----------
+    Plot is generated in console or saved, based on params passed
     """
     # Check that the input variables are of the correct type
     if not isinstance(mask, np.ndarray):
@@ -822,3 +851,127 @@ def plotEdgeAz(mask, no_lines=4,
         plt.tight_layout()
         plt.show()
     return
+
+
+def getRectangleDimensions(polygon):
+    """
+    Calculate the width and length of a rectangular polygon.
+    Returns the two edge lengths and their orientations.
+
+    Parameters
+    -----------
+    polygon: (shapely.geometry.Polygon)
+        Rectangular polygon that we want to calculate the width, length, and
+        associated angles for
+
+    Returns
+    -----------
+    dictionary or None:
+        Dictionary object with fields for the width, length, and
+        associated angles of the mask. If not a rectangle, returns None
+    """
+    # Check that the input variables are of the correct type
+    if not isinstance(polygon, Polygon):
+        raise TypeError("Variable polygon must be of type Shapely polygon.")
+    coords = list(polygon.exterior.coords)[:-1]  # Remove duplicate last point
+
+    # Calculate distances between consecutive vertices
+    edges = []
+    for i in range(len(coords)):
+        p1 = np.array(coords[i])
+        p2 = np.array(coords[(i + 1) % len(coords)])
+
+        # Calculate edge vector and length
+        edge_vector = p2 - p1
+        edge_length = np.linalg.norm(edge_vector)
+        edge_angle = np.arctan2(edge_vector[1], edge_vector[0])
+
+        edges.append({
+            'length': edge_length,
+            'angle': edge_angle,
+            'vector': edge_vector,
+            'start': p1,
+            'end': p2
+        })
+
+    # Group opposite edges (should be parallel and equal length in a rectangle)
+    # For a 4-sided polygon, opposite edges are at indices 0-2 and 1-3
+    if len(edges) == 4:
+        edge1_length = edges[0]['length']
+        edge2_length = edges[1]['length']
+
+        # Determine which is width (shorter) and which is length (longer)
+        if edge1_length < edge2_length:
+            width = edge1_length
+            length = edge2_length
+            width_angle = edges[0]['angle']
+            length_angle = edges[1]['angle']
+        else:
+            width = edge2_length
+            length = edge1_length
+            width_angle = edges[1]['angle']
+            length_angle = edges[0]['angle']
+
+        return {
+            'width': width,
+            'length': length,
+            'width_angle': width_angle,
+            'length_angle': length_angle
+        }
+    else:
+        return None
+
+
+def standardizeRectangleWidth(polygon, target_width):
+    """
+    Adjust a rectangular polygon to have a standardized width while
+    maintaining its center position, orientation, and length.
+
+    Parameters
+    -----------
+    polygon: (shapely.geometry.Polygon)
+        Rectangular polygon that has a non-standardized width (tracker row or
+        fixed-tilt row)
+    target_width: (float)
+        target width of the row. Normally determined via finding the median
+        row width across all masks.
+    Returns
+    -----------
+    Shapely polygon representing the newly standardized rectangle mask
+    """
+    if not isinstance(polygon, Polygon):
+        raise TypeError("Variable polygon must be of type Shapely polygon.")
+    if not isinstance(target_width, float):
+        raise TypeError("Variable targrt_width must be of type float.")
+
+    dims = getRectangleDimensions(polygon)
+    if dims is None:
+        return polygon
+
+    # Get the center of the polygon
+    centroid = polygon.centroid
+    center = np.array([centroid.x, centroid.y])
+
+    # Calculate the length direction (perpendicular to width)
+    length_angle = dims['length_angle']
+    width_angle = dims['width_angle']
+
+    # Unit vectors for length and width directions
+    length_dir = np.array([np.cos(length_angle), np.sin(length_angle)])
+    width_dir = np.array([np.cos(width_angle), np.sin(width_angle)])
+
+    # Half dimensions
+    half_length = dims['length'] / 2.0
+    half_width = target_width / 2.0
+
+    # Create new rectangle centered at the centroid
+    # The four corners are: center ± half_length * length_dir ±
+    # half_width * width_dir
+    corners = [
+        center + half_length * length_dir + half_width * width_dir,
+        center + half_length * length_dir - half_width * width_dir,
+        center - half_length * length_dir - half_width * width_dir,
+        center - half_length * length_dir + half_width * width_dir,
+        center + half_length * length_dir + half_width * width_dir,
+    ]
+    return Polygon(corners)

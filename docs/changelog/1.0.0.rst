@@ -16,6 +16,8 @@ Scripts
 - Added the scripts for LiDAR pipeline in the lidar folder :py:mod:`panel_segmentation.lidar`. (:pull:`45`)
 - Added unit testing for all functions in the lidar folder. (:pull:`45`)
 - Added new panel-detection instance segmentation model and deprecated old models. This standardized all model architecture to MMDetetection (remove detecto dependency). (:pull:`55`)
+- Added new utils functions for faster computation + post-processing of autogeotagging pipeline, including :py:func:`panel_segmentation.utils.getRectangleDimensions`
+  and :py:func:`panel_segmentation.utils.standardizeRectangleWidth`. Updated existing functions for polygon generation from DL masks to be vectorized. (:pull:`59`)
 
 Bug Fixes
 ~~~~~~~~~

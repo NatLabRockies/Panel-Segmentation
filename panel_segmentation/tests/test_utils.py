@@ -10,6 +10,9 @@ import pytest
 import numpy as np
 from mpl_toolkits.axes_grid1.axes_grid import ImageGrid
 import json
+from shapely.geometry import Polygon
+import matplotlib
+matplotlib.use("Agg")
 
 example_path = os.path.join("panel_segmentation", "examples", "utils_examples")
 
@@ -144,6 +147,49 @@ def convertMaskToLatLonPolygonParams():
     zoom_level = 18
     return mask, img_center_lat, img_center_lon, image_x_pixels, \
         image_y_pixels, zoom_level
+
+
+@pytest.fixture
+def detectAzimuthParams():
+    """
+    Contains the proper variable types for running detectAzimuth function.
+    """
+    mask = _make_horizontal_bar_mask()
+    number_lines = 4
+    return mask, number_lines
+
+
+@pytest.fixture
+def plotEdgeAzParams():
+    """
+    Contains the proper variable types for running plotEdgeAz function.
+    """
+    mask = _make_horizontal_bar_mask()
+    no_lines = 4
+    save_img_file_path = None
+    plot_show = False
+    return mask, no_lines, save_img_file_path, plot_show
+
+
+@pytest.fixture
+def getRectangleDimensionsParams():
+    """
+    Contains the proper variable types for running getRectangleDimensions
+    function.
+    """
+    polygon = _make_rectangle_polygon()
+    return (polygon,)
+
+
+@pytest.fixture
+def standardizeRectangleWidthParams():
+    """
+    Contains the proper variable types for running standardizeRectangleWidth
+    function.
+    """
+    polygon = _make_rectangle_polygon()
+    target_width = 1.0
+    return polygon, target_width
 
 
 def testGenerateSatelliteImageTypeErrors(satelliteImageParams):
@@ -569,12 +615,12 @@ def testTranslateLatLongCoordinatesTypeOutput(translateLatLongCoordsParams):
     """
     latitude, longitude, lat_translation_meters, \
         long_translation_meters = translateLatLongCoordsParams
-    actual_lat, actual_lon = utils.translateLatLongCoordinates(
+    lat_lon_coords = utils.translateLatLongCoordinates(
         latitude, longitude, lat_translation_meters, long_translation_meters)
     # Assert actual_lat is a float
-    assert isinstance(actual_lat, float)
+    assert isinstance(lat_lon_coords[0][0], float)
     # Assert actual_lon is a float
-    assert isinstance(actual_lon, float)
+    assert isinstance(lat_lon_coords[0][1], float)
 
 
 def testGetInferenceBoxLatLonCoordinatesTypeErrors(
@@ -664,12 +710,12 @@ def testBinaryMaskToPolygonOutput():
     mask[1:3, 1:3] = 1
     polygon_contours = utils.binaryMaskToPolygon(mask)
     # Assert that polygon_contours is a list
-    assert isinstance(polygon_contours, list)
+    assert isinstance(polygon_contours, np.ndarray)
     # Assert that polygon_contours is of length 4 (a square) from mask
     assert len(polygon_contours) == 4
     for coordinates in polygon_contours:
         # Assert that the coordinates inside polygon_coutours is a tuple
-        assert isinstance(coordinates, tuple)
+        assert isinstance(coordinates,  np.ndarray)
         # Assert that the coordinates is a tuple is length 2 (x,y)
         assert len(coordinates) == 2
 
@@ -768,3 +814,233 @@ def testConvertPolygonToGeojsonOutput():
     assert feature["geometry"]["type"] == "Polygon"
     # Assert that the feature returns the polygon_coord_list in geojson format
     assert feature["geometry"]["coordinates"] == geojson_poly_coord_list
+
+
+def _make_horizontal_bar_mask(size=100):
+    """
+    Creates a binary mask with a clear horizontal bar, giving the Hough
+    transform a dominant horizontal line to detect.
+    """
+    mask = np.zeros((size, size), dtype=bool)
+    mask[size // 2 - 2: size // 2 + 2, 10: size - 10] = True
+    return mask
+
+
+def _make_rectangle_polygon():
+    """
+    Creates a simple axis-aligned 4x2 rectangle Shapely polygon. Width = 2,
+    length = 4, so angles are 0 and pi/2.
+    """
+    return Polygon([(0, 0), (4, 0), (4, 2), (0, 2)])
+
+
+def _make_non_rectangle_polygon():
+    """
+    Creates a triangle (3-sided) polygon, which getRectangleDimensions
+    should return None for.
+    """
+    return Polygon([(0, 0), (1, 0), (0.5, 1)])
+
+
+def testDetectAzimuthTypeErrors(detectAzimuthParams):
+    """
+    Tests if TypeErrors is raised for incorrect variable types.
+    """
+    mask, number_lines = detectAzimuthParams
+    # Tests for mask np.ndarray type
+    with pytest.raises(
+            TypeError,
+            match="Variable mask must be of type Numpy ndarray."):
+        utils.detectAzimuth([[0, 1], [1, 0]], number_lines)
+    # Tests for number_lines int type
+    with pytest.raises(
+            TypeError,
+            match="Variable number_lines must be of type int."):
+        utils.detectAzimuth(mask, "4")
+
+
+def testDetectAzimuthOutput(detectAzimuthParams):
+    """
+    Tests if detectAzimuth returns an integer azimuth value in the
+    expected range [0, 360).
+    """
+    mask, number_lines = detectAzimuthParams
+    azimuth = utils.detectAzimuth(mask, number_lines)
+    # Assert azimuth is an int
+    assert isinstance(azimuth, int)
+    # Assert azimuth is within the valid compass bearing range
+    assert 0 <= azimuth < 360
+
+
+def testDetectAzimuthDefaultNumberLines(detectAzimuthParams):
+    """
+    Tests that detectAzimuth runs correctly with the default number_lines
+    parameter.
+    """
+    mask, _ = detectAzimuthParams
+    azimuth = utils.detectAzimuth(mask)
+    assert isinstance(azimuth, int)
+    assert 0 <= azimuth < 360
+
+
+def testPlotEdgeAzTypeErrors(plotEdgeAzParams):
+    """
+    Tests if TypeErrors is raised for incorrect variable types.
+    """
+    mask, no_lines, save_img_file_path, plot_show = plotEdgeAzParams
+    # Tests for mask np.ndarray type
+    with pytest.raises(
+            TypeError,
+            match="Variable mask must be of type Numpy ndarray."):
+        utils.plotEdgeAz([[0, 1], [1, 0]], no_lines,
+                         save_img_file_path, plot_show)
+    # Tests for no_lines int type
+    with pytest.raises(
+            TypeError,
+            match="Variable no_lines must be of type int."):
+        utils.plotEdgeAz(mask, 4.0, save_img_file_path, plot_show)
+    # Tests for plot_show bool type
+    with pytest.raises(
+            TypeError,
+            match="Variable no_figs must be of type boolean."):
+        utils.plotEdgeAz(mask, no_lines, save_img_file_path, "False")
+
+
+def testPlotEdgeAzReturnsNone(plotEdgeAzParams):
+    """
+    Tests that plotEdgeAz returns None (output is a plot, not a value).
+    """
+    mask, no_lines, save_img_file_path, plot_show = plotEdgeAzParams
+    result = utils.plotEdgeAz(mask, no_lines, save_img_file_path, plot_show)
+    assert result is None
+
+
+def testGetRectangleDimensionsTypeErrors(getRectangleDimensionsParams):
+    """
+    Tests if TypeErrors is raised for incorrect variable types.
+    """
+    (polygon,) = getRectangleDimensionsParams
+    # Tests for polygon Shapely Polygon type
+    with pytest.raises(
+            TypeError,
+            match="Variable polygon must be of type Shapely polygon."):
+        utils.getRectangleDimensions([(0, 0), (1, 0), (1, 1), (0, 1)])
+
+
+def testGetRectangleDimensionsOutput(getRectangleDimensionsParams):
+    """
+    Tests that getRectangleDimensions returns a dictionary with the
+    expected keys and correct value types for a rectangular polygon.
+    """
+    (polygon,) = getRectangleDimensionsParams
+    result = utils.getRectangleDimensions(polygon)
+    # Assert result is a dictionary
+    assert isinstance(result, dict)
+    # Assert all expected keys are present
+    for key in ("width", "length", "width_angle", "length_angle"):
+        assert key in result
+    # Assert width <= length (width is the shorter dimension)
+    assert result["width"] <= result["length"]
+    # Assert all values are floats
+    for key in ("width", "length", "width_angle", "length_angle"):
+        assert isinstance(result[key], float)
+
+
+def testGetRectangleDimensionsCorrectValues(getRectangleDimensionsParams):
+    """
+    Tests that getRectangleDimensions returns correct width and length
+    values for a known 4x2 rectangle.
+    """
+    (polygon,) = getRectangleDimensionsParams
+    result = utils.getRectangleDimensions(polygon)
+    # For a 4x2 rectangle: width=2, length=4
+    assert result["width"] == pytest.approx(2.0, abs=1e-6)
+    assert result["length"] == pytest.approx(4.0, abs=1e-6)
+
+
+def testGetRectangleDimensionsNonRectangleReturnsNone():
+    """
+    Tests that getRectangleDimensions returns None for a non-4-sided polygon.
+    """
+    triangle = _make_non_rectangle_polygon()
+    result = utils.getRectangleDimensions(triangle)
+    assert result is None
+
+
+def testStandardizeRectangleWidthTypeErrors(standardizeRectangleWidthParams):
+    """
+    Tests if TypeErrors is raised for incorrect variable types.
+    """
+    polygon, target_width = standardizeRectangleWidthParams
+    # Tests for polygon Shapely Polygon type
+    with pytest.raises(
+            TypeError,
+            match="Variable polygon must be of type Shapely polygon."):
+        utils.standardizeRectangleWidth(
+            [(0, 0), (4, 0), (4, 2), (0, 2)], target_width)
+    # Tests for target_width float type
+    with pytest.raises(
+            TypeError,
+            match="Variable targrt_width must be of type float."):
+        utils.standardizeRectangleWidth(polygon, 1)
+
+
+def testStandardizeRectangleWidthOutput(standardizeRectangleWidthParams):
+    """
+    Tests that standardizeRectangleWidth returns a Shapely Polygon.
+    """
+    polygon, target_width = standardizeRectangleWidthParams
+    result = utils.standardizeRectangleWidth(polygon, target_width)
+    assert isinstance(result, Polygon)
+
+
+def testStandardizeRectangleWidthCorrectWidth(standardizeRectangleWidthParams):
+    """
+    Tests that the output polygon has approximately the target width.
+    """
+    polygon, target_width = standardizeRectangleWidthParams
+    result = utils.standardizeRectangleWidth(polygon, target_width)
+    result_dims = utils.getRectangleDimensions(result)
+    # The standardized width should match the target width
+    assert result_dims["width"] == pytest.approx(target_width, abs=1e-6)
+
+
+def testStandardizeRectangleWidthPreservesLength(
+        standardizeRectangleWidthParams):
+    """
+    Tests that standardizeRectangleWidth preserves the original length
+    of the polygon.
+    """
+    polygon, target_width = standardizeRectangleWidthParams
+    original_dims = utils.getRectangleDimensions(polygon)
+    result = utils.standardizeRectangleWidth(polygon, target_width)
+    result_dims = utils.getRectangleDimensions(result)
+    # The length should be preserved after standardizing width
+    assert result_dims["length"] == pytest.approx(
+        original_dims["length"], abs=1e-6)
+
+
+def testStandardizeRectangleWidthPreservesCentroid(
+        standardizeRectangleWidthParams):
+    """
+    Tests that standardizeRectangleWidth preserves the centroid of the
+    original polygon.
+    """
+    polygon, target_width = standardizeRectangleWidthParams
+    result = utils.standardizeRectangleWidth(polygon, target_width)
+    # Assert centroid x is preserved
+    assert result.centroid.x == pytest.approx(polygon.centroid.x, abs=1e-6)
+    # Assert centroid y is preserved
+    assert result.centroid.y == pytest.approx(polygon.centroid.y, abs=1e-6)
+
+
+def testStandardizeRectangleWidthNonRectanglePassthrough():
+    """
+    Tests that standardizeRectangleWidth returns the original polygon
+    unchanged if getRectangleDimensions returns None (non-4-sided polygon).
+    """
+    triangle = _make_non_rectangle_polygon()
+    target_width = 1.0
+    result = utils.standardizeRectangleWidth(triangle, target_width)
+    # Triangle is passed through unchanged
+    assert result.equals(triangle)
