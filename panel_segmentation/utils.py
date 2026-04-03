@@ -576,12 +576,13 @@ def getInferenceBoxLatLonCoordinates(box, img_center_lat, img_center_lon,
                               meter_pixel_conversion)
     lat_translation_meters = ((image_center_pixels_y - cy) *
                               meter_pixel_conversion)
-    box_lat, box_lon = translateLatLongCoordinates(
+    polygon_lat_lon_coords = translateLatLongCoordinates(
         latitude=img_center_lat,
         longitude=img_center_lon,
         lat_translation_meters=lat_translation_meters,
         long_translation_meters=lon_translation_meters)
-    return (box_lat, box_lon)
+    polygon_lat_lon_coords = [(y,x) for x, y in polygon_lat_lon_coords][0]
+    return polygon_lat_lon_coords
 
 
 def binaryMaskToPolygon(mask):
@@ -609,7 +610,7 @@ def binaryMaskToPolygon(mask):
     # Find contours
     contours, _ = cv2.findContours(binary_mask, 
                                    cv2.RETR_EXTERNAL,
-                                   cv2.CHAIN_APPROX_TC89_L1) 
+                                   cv2.CHAIN_APPROX_SIMPLE)
     # Fast concatenation using vstack instead of loop
     coords = np.vstack(contours).reshape(-1, 2)
     return coords
