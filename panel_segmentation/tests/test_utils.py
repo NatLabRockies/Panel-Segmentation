@@ -915,13 +915,13 @@ def testPlotEdgeAzReturnsNone(plotEdgeAzParams):
     assert result is None
 
 
-def testPlotEdgeAzSavesFile(plotEdgeAzParams, tmp_path):
+def testPlotEdgeAzSavesFile(plotEdgeAzParams):
     """
     Tests that plotEdgeAz saves an image file when save_img_file_path
     is provided.
     """
     mask, no_lines, _, plot_show = plotEdgeAzParams
-    save_dir = str(tmp_path)
+    save_dir = "./test-az.png"
     utils.plotEdgeAz(mask, no_lines,
                      save_img_file_path=save_dir, plot_show=plot_show)
     # Assert the file was created at the expected path

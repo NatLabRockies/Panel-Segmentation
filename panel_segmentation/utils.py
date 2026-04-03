@@ -501,10 +501,10 @@ def translateLatLongCoordinates(latitude, longitude,
         raise TypeError("latitude variable must be of type float.")
     if not isinstance(longitude, float):
         raise TypeError("longitude variable must be of type float.")
-    if not isinstance(lat_translation_meters, float):
+    if not (isinstance(lat_translation_meters, float) | isinstance(lat_translation_meters, np.ndarray)):
         raise TypeError("lat_translation_meters variable must be of" +
                         " type float.")
-    if not isinstance(long_translation_meters, float):
+    if not (isinstance(long_translation_meters, float) | isinstance(long_translation_meters, np.ndarray)):
         raise TypeError("long_translation_meters variable must be of" +
                         " type float.")
     # Convert scalars to arrays for consistent handling
