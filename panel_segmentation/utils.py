@@ -648,8 +648,7 @@ def getInferenceBoxLatLonCoordinates(box, img_center_lat, img_center_lon,
         longitude=img_center_lon,
         lat_translation_meters=lat_translation_meters,
         long_translation_meters=lon_translation_meters)
-    polygon_lat_lon_coords = [(y, x) for x, y in polygon_lat_lon_coords][0]
-    return polygon_lat_lon_coords
+    return polygon_lat_lon_coords[0]
 
 
 def binaryMaskToPolygon(mask):
@@ -742,7 +741,6 @@ def convertMaskToLatLonPolygon(mask, img_center_lat,
         img_center_lat, img_center_lon,
         dy_meters, dx_meters
     )
-    polygon_lat_lon_coords = [(y, x) for x, y in polygon_lat_lon_coords]
     return polygon_lat_lon_coords
 
 
