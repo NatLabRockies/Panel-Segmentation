@@ -17,7 +17,57 @@ from shapely.geometry import Polygon
 import geopandas
 from pyproj import Transformer
 from skimage.transform import hough_line, hough_line_peaks
+from huggingface_hub import hf_hub_download
 
+
+def downloadModel(filename, 
+                  repo_id="kperrynrel/panel-segmentation-models"):
+    """
+    Download a model file from a Hugging Face repository and save it
+    to the panel_segmentation/models folder.
+
+    Parameters
+    ----------
+    filename : str
+        The name of the model file to download from the repository.
+        Example: 'panel_detection_model.pth'
+    repo_id : str
+        The Hugging Face repository ID in the format 'owner/repo-name'.
+        Default is 'kperrynrel/panel-segmentation-models', which is where
+        the models are located.
+
+    Returns
+    -------
+    model_path : str
+        The full file path of the downloaded model.
+    """
+    # Check input variable types
+    if not isinstance(repo_id, str):
+        raise TypeError("repo_id variable must be of type string.")
+    if not isinstance(filename, str):
+        raise TypeError("filename variable must be of type string.")
+    # models folder is panel_segmentation/models relative to utils.py
+    models_folder = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "models"
+        )
+    # Build the destination path
+    model_path = os.path.join(models_folder, filename)
+    # Skip download if the file already exists locally
+    if os.path.exists(model_path):
+        print(f"Model already exists at {model_path}, skipping download.")
+        return model_path
+    try:
+        downloaded_path = hf_hub_download(
+            repo_id=repo_id,
+            filename=filename,
+            local_dir=models_folder
+        )
+    except Exception as e:
+        raise ValueError(
+            f"Failed to download '{filename}' from '{repo_id}': {e}"
+        )
+    print(f"Model downloaded to {downloaded_path}")
+    return downloaded_path
 
 def generateSatelliteImage(latitude, longitude,
                            file_name_save, google_maps_api_key,
