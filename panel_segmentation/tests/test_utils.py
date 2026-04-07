@@ -192,6 +192,49 @@ def standardizeRectangleWidthParams():
     return polygon, target_width
 
 
+@pytest.fixture
+def downloadModelParams():
+    """
+    Contains the proper variable types for running downloadModel function.
+    """
+    filename = "panel_detection_model.pth"
+    repo_id = "kperrynrel/panel-segmentation-models"
+    return filename, repo_id
+
+
+def testDownloadModelTypeErrors(downloadModelParams):
+    """
+    Tests if TypeErrors are raised for incorrect variable types.
+    """
+    filename, repo_id = downloadModelParams
+    # Tests for filename str type
+    with pytest.raises(
+            TypeError, match="filename variable must be of type string."):
+        utils.downloadModel(12345, repo_id)
+    # Tests for repo_id str type
+    with pytest.raises(
+            TypeError, match="repo_id variable must be of type string."):
+        utils.downloadModel(filename, 99)
+
+
+def testDownloadModelRaisesOnFailure(downloadModelParams, mocker, tmp_path):
+    """
+    Tests that downloadModel raises a ValueError if hf_hub_download fails.
+    """
+    filename, repo_id = downloadModelParams
+    mocker.patch(
+        "panel_segmentation.utils.os.path.dirname",
+        return_value=str(tmp_path)
+    )
+    mocker.patch(
+        "panel_segmentation.utils.hf_hub_download",
+        side_effect=Exception("404 Not Found")
+    )
+    error_string = f"Failed to download '{filename}' from '{repo_id}'"
+    with pytest.raises(ValueError, match=error_string):
+        utils.downloadModel(filename, repo_id)
+
+
 def testGenerateSatelliteImageTypeErrors(satelliteImageParams):
     """
     Tests if TypeErrors is rasied for incorrect variable types.

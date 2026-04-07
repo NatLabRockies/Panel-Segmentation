@@ -11,16 +11,7 @@ Installation Guide
 ------------------
 To install Panel-Segmentation, perform the following steps:
 
-1. Enable Git large file storage (lfs)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-You must have Git large file storage (lfs) on your computer in order to download the deep learning models in this package.
-Go to the following site to download Git lfs: 
-
-.. code-block:: console
-
-    https://git-lfs.github.com/
-
-2. Pip install panel-segmentation
+1. Pip install panel-segmentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Once git lfs is installed, you can now install Panel-Segmentation on your computer.
 We are still working on making panel-segmentation available via PyPi, so entering the following in the command line will install the package locally on your computer:
@@ -31,7 +22,7 @@ We are still working on making panel-segmentation available via PyPi, so enterin
     cd Panel-Segmentation
     pip install .
 
-3. Pip install mmcv
+2. Pip install mmcv
 ^^^^^^^^^^^^^^^^^^^
 Panel-Segmentation requires the MMCV package, which can be tricky to install for CPU-only, and needs to be installed from source.
 To install MMCV for source, run the following in the command line:
@@ -39,6 +30,11 @@ To install MMCV for source, run the following in the command line:
 .. code-block:: console
 
     pip install git+https://github.com/open-mmlab/mmcv.git@v2.1.0
+
+3. Download Models from Hugging Face Repository
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Due to model size, all models are hosted publicly in the following Hugging Face repo: https://huggingface.co/kperrynrel/panel-segmentation-models. They can be downloaded
+directly to the panel_segmentation/models/ folder via the utils.downloadModel() function. See notebook examples for clarification.
 
 4. Set model paths
 ^^^^^^^^^^^^^^^^^^

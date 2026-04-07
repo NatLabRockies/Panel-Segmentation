@@ -1,3 +1,2 @@
 pvpa/_version.py export-subst
 panel_segmentation/_version.py export-subst
-*.pth filter=lfs diff=lfs merge=lfs -text

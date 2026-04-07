@@ -3,6 +3,7 @@
 config.yaml
 *.vs/
 **.pyc
+*.pth
 
 # Jupyter Notebook
 .ipynb_checkpoints

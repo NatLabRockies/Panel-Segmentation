@@ -20,7 +20,7 @@ from skimage.transform import hough_line, hough_line_peaks
 from huggingface_hub import hf_hub_download
 
 
-def downloadModel(filename, 
+def downloadModel(filename,
                   repo_id="kperrynrel/panel-segmentation-models"):
     """
     Download a model file from a Hugging Face repository and save it
@@ -48,8 +48,8 @@ def downloadModel(filename,
         raise TypeError("filename variable must be of type string.")
     # models folder is panel_segmentation/models relative to utils.py
     models_folder = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "models"
-        )
+        os.path.dirname(os.path.abspath(__file__)), "models"
+    )
     # Build the destination path
     model_path = os.path.join(models_folder, filename)
     # Skip download if the file already exists locally
