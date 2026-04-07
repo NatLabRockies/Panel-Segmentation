@@ -69,6 +69,7 @@ def downloadModel(filename,
     print(f"Model downloaded to {downloaded_path}")
     return downloaded_path
 
+
 def generateSatelliteImage(latitude, longitude,
                            file_name_save, google_maps_api_key,
                            zoom_level=18):
