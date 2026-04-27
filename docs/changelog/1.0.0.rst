@@ -29,6 +29,7 @@ Other Changes
 - Updated setup.py and requirements.txt to include the new dependencies for Mesh Scan and LiDAR pipeline. (:pull:`44`)
 - Upgraded to pyproject.toml paradigm. (:pull:`54`)
 - Updated test harness to Python 3.10-3.12 from Python 3.8-3.10. (:pull:`56`)
+- Moved all model hosting to Hugging Face, and created utils function to pull models from Hugging Face repo (https://huggingface.co/kperrynrel/panel-segmentation-models). (:pull:`60`)
 
 Contributors
 ~~~~~~~~~~~~
