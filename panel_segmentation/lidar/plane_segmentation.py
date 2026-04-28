@@ -1,10 +1,7 @@
 import numpy as np
 import pandas as pd
 import pyproj
-from sklearn.cluster import DBSCAN
-import open3d as o3d
-from shapely.ops import transform as shapely_transform
-from shapely.geometry import MultiPoint
+
 
 class PlaneSegmentation:
     '''
@@ -16,7 +13,7 @@ class PlaneSegmentation:
         self.pcd = pcd
 
     def segmentPlanes(self, distance_threshold=1.0, ransac_n=3,
-                      num_ransac_iterations=5000, min_plane_points=10,
+                      num_ransac_iterations=5000, min_plane_points=3,
                       max_num_planes=10):
         """
         Segment planes from point cloud data using RANSAC algorithm.
@@ -29,7 +26,7 @@ class PlaneSegmentation:
             Defaulted to 1.0.
         ransac_n: int
             The minimum number of points needed to form a plane.
-            Defaulted to 10.
+            Defaulted to 3.
         num_ransac_iterations: int
             The number of iterations to run the RANSAC algorithm.
             Defaulted to 5000.
@@ -102,10 +99,11 @@ class PlaneSegmentation:
                 # Store plane information
                 plane_info_dict = {
                     "plane_id": plane_count,
+                    "normal_plane_vectors": plane_normal_vectors,
                     "tilt": tilt,
                     "azimuth": az,
                     "num_points": len(inliers),
-                    "pcd": plane_pcd,
+                    "pcd": np.asarray(plane_pcd.points),
                     "color": color
                 }
                 self.plane_list.append(plane_info_dict)
@@ -113,9 +111,9 @@ class PlaneSegmentation:
                 # next plane segmentation
                 current_pcd = current_pcd.select_by_index(inliers, invert=True)
                 plane_count += 1
-        return
 
-    def mergeSimilarPlanes(self, az_weight=1.0, tilt_weight=1.0, eps=0.5, min_samples=1):
+    def mergeSimilarPlanes(self, tilt_diff_threshold=5.0,
+                           azimuth_diff_threshold=10.0):
         """
         Merge planes that are within similar tilt and azimuth threshold.
         Gets the mean tilt and azimuth of the combined planes.
@@ -133,46 +131,83 @@ class PlaneSegmentation:
         --------
         None.
         """
+        # Ensure that the inputs are of the correct type
+        if not isinstance(tilt_diff_threshold, float):
+            raise TypeError("tilt_diff_threshold variable must be of type " +
+                            "float.")
+        if not isinstance(azimuth_diff_threshold, float):
+            raise TypeError("azimuth_diff_threshold variable must be of " +
+                            "type float.")
+        # A master list of dictionaries with info from all merged planes
+        merged_plane_list = []
+        merged_plane_id = set()
+        # Initialize new plane id
+        new_idx = 0
         # Iterate through each plane in the list
-        az_rad = np.array([np.radians(p['azimuth']) for p in self.plane_list])
-        tilts  = np.array([p['tilt'] for p in self.plane_list])
-    
-        # Normalize tilt to [0, 1] range so it's comparable to az components
-        tilt_norm = (tilts - tilts.min()) / (tilts.max() - tilts.min() + 1e-9)
-    
-        features = np.column_stack([
-            np.sin(az_rad) * az_weight,
-            np.cos(az_rad) * az_weight,
-            tilt_norm      * tilt_weight,
-        ])
-    
-        labels = DBSCAN(eps=eps, min_samples=min_samples, metric='euclidean'
-                        ).fit_predict(features)
-        clusters = {}
-        for plane, label in zip(self.plane_list, labels):
-            plane['cluster_id'] = int(label)
-            clusters.setdefault(int(label), []).append(plane)
-        
-        # For each cluster, create a summary plane
-        cluster_planes_merged = list()
-        for cluster in clusters:
-            cluster_merged = dict()
-            cluster_planes = clusters[cluster]
-            cluster_merged['plane_id'] = cluster
-            cluster_merged['azimuth'] = np.median([x['azimuth'] for x in cluster_planes])
-            cluster_merged['tilt'] = np.median([x['tilt'] for x in cluster_planes])
-            cluster_merged['num_points'] = sum([x['num_points'] for x in cluster_planes])
-            merged_point_cloud = o3d.geometry.PointCloud()
-            point_clouds = [x['pcd'] for x in cluster_planes]
-            for pcd in point_clouds:
-                merged_point_cloud += pcd
-            cluster_merged['pcd'] = merged_point_cloud
-            cluster_merged['color'] = np.random.rand(3)
-            cluster_planes_merged.append(cluster_merged)
-        # save the sumamry planes to the main plane_list
-        self.plane_list = cluster_planes_merged
-        return 
-    
+        for idx_1, plane_1 in enumerate(self.plane_list):
+            # Skip plane idx if it is already merged
+            if idx_1 in merged_plane_id:
+                continue
+            # Group similar planes together
+            grouped_planes = []
+            grouped_planes.append(plane_1)
+            merged_plane_id.add(idx_1)
+            # Compare plane_1 with plane_2
+            for idx_2, plane_2 in enumerate(self.plane_list):
+                if idx_2 in merged_plane_id:
+                    continue
+                # Calculate the difference in tilt and azimuth
+                tilt_diff = abs(plane_1["tilt"] - plane_2["tilt"])
+                # Find the smallest angle between the difference in azimuth
+                az_diff = abs(plane_1["azimuth"] - plane_2["azimuth"]) % 360
+                az_diff = min(az_diff, 360 - az_diff)
+                # Combine plane if the tilt and azimuth is within the threshold
+                if tilt_diff <= tilt_diff_threshold:
+                    if az_diff <= azimuth_diff_threshold:
+                        grouped_planes.append(plane_2)
+                        merged_plane_id.add(idx_2)
+            # Add plane_1 to the master list if no similarities are found
+            if len(grouped_planes) <= 1:
+                plane_1["plane_id"] = new_idx
+                plane_1["combined_from"] = "None"
+                merged_plane_list.append(plane_1)
+                new_idx += 1
+            # Combine metadata of similar planes
+            else:
+                # Find the mean tilt, azimuth, and normal vectors
+                mean_tilt = np.mean([plane["tilt"]
+                                    for plane in grouped_planes])
+                mean_az = np.mean([plane["azimuth"]
+                                  for plane in grouped_planes])
+                mean_normal_vectors = np.mean(
+                    [plane["normal_plane_vectors"]
+                     for plane in grouped_planes], axis=0)
+                # Get other combined metadata
+                num_points = sum(plane["num_points"]
+                                 for plane in grouped_planes)
+                combined_from = [plane["plane_id"]
+                                 for plane in grouped_planes]
+                combined_pcd = sum(
+                    [plane["pcd"]for plane in grouped_planes[1:]],
+                    grouped_planes[0]["pcd"])
+                # Generate a random plane color for visualization later
+                color = np.random.rand(3)
+                # Add everything to a dict
+                new_plane_info_dict = {
+                    "plane_id": new_idx,
+                    "normal_plane_vectors": mean_normal_vectors,
+                    "tilt": mean_tilt,
+                    "azimuth": mean_az,
+                    "num_points": num_points,
+                    "pcd": combined_pcd,
+                    "color": color,
+                    "combined_from": combined_from
+                }
+                # Add the merged plane and its metadata to the master list
+                merged_plane_list.append(new_plane_info_dict)
+                new_idx += 1
+        self.plane_list = merged_plane_list
+
     def visualizePlanes(self):
         """
         Creates a mesh for each plane to create a surface model
@@ -262,22 +297,13 @@ class PlaneSegmentation:
             lat, lon = self.getPlaneCenters(
                 source_crs, scales, offsets,
                 center_points[0], center_points[1])
-            # Get the plane boundary in lat-lon form
-            # generate a concave hull via alphashape
-            xy = points[:, :2] 
-            boundary_polygon = MultiPoint(xy).convex_hull
-            plane_poly = self.getPlaneBoundaryLatLon(source_crs, 
-                                                     scales, offsets,
-                                                     boundary_polygon)
-            
             # Get only important metadata
             plane_metadata_list.append({"plane_id": plane["plane_id"],
                                         "tilt": plane["tilt"],
                                         "azimuth": plane["azimuth"],
                                         "num_points": plane["num_points"],
                                         "center_lat": lat,
-                                        "center_lon": lon,
-                                        "plane_polygon": plane_poly})
+                                        "center_lon": lon})
         resultant_df = pd.DataFrame(plane_metadata_list)
         return resultant_df
 
@@ -344,52 +370,7 @@ class PlaneSegmentation:
         # Project lidar source crs onto lat, lon "EPSG:4326" crs
         center_lon, center_lat = transformer.transform(scaled_x, scaled_y)
         return center_lat, center_lon
-    
-    def getPlaneBoundaryLatLon(self, source_crs, scales, offsets, boundary_polygon):
-        """
-        Reprojects a plane boundary polygon from LiDAR source CRS to EPSG:4326.
-    
-        Parameters:
-        -----------
-        source_crs: pyproj.crs.CRS
-            The source coordinate reference system of the original LiDAR data.
-        scales: tuple, list, or numpy.ndarray
-            The x, y, z scale components (x_scale, y_scale, z_scale).
-        offsets: tuple, list, or numpy.ndarray
-            The x, y, z offset components (x_offset, y_offset, z_offset).
-        boundary_polygon: shapely.geometry.Polygon or MultiPolygon
-            The plane boundary in raw LiDAR coordinate space.
-    
-        Returns:
-        --------
-        shapely.geometry.Polygon or MultiPolygon in EPSG:4326 (lat/lon)
-        """
-        if not isinstance(source_crs, pyproj.crs.CRS):
-            raise TypeError("source_crs must be of type pyproj.crs.CRS.")
-        if not isinstance(scales, (tuple, list, np.ndarray)):
-            raise TypeError("scales must be of type tuple, list, or numpy.ndarray.")
-        if not isinstance(offsets, (tuple, list, np.ndarray)):
-            raise TypeError("offsets must be of type tuple, list, or numpy.ndarray.")
-    
-        # Build transformer
-        if source_crs.is_compound:
-            horizontal_crs = source_crs.sub_crs_list[0]
-            transformer = pyproj.Transformer.from_crs(
-                horizontal_crs, "EPSG:4326", always_xy=True)
-        else:
-            transformer = pyproj.Transformer.from_crs(
-                source_crs, "EPSG:4326", always_xy=True)
-    
-        def _transform_coords(xs, ys):
-            # Apply scale + offset
-            scaled_x = np.asarray(xs) * scales[0] + offsets[0]
-            scaled_y = np.asarray(ys) * scales[1] + offsets[1]
-            lons, lats = transformer.transform(scaled_x, scaled_y)
-            # shapely_transform expects (x, y) = (lon, lat) for EPSG:4326
-            return lons, lats
-        
-        return shapely_transform(_transform_coords, boundary_polygon)
-    
+
     def getBestPlane(self):
         """
         Gets the best plane from the number of points.

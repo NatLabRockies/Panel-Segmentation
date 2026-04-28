@@ -83,24 +83,38 @@ class PCD:
         # Ensure that the inputs are of the correct type
         if not isinstance(chunk_size, int):
             raise TypeError("chunk_size variable must be of type int.")
-        with laspy.open(self.laz_file_path) as f:            
+        # Process LiDAR data in chunks since .laz files are large
+        with laspy.open(self.laz_file_path) as f:
+            final_point_record = laspy.PackedPointRecord.empty(
+                f.header.point_format)
+            # Get crs of LiDAR data
             self.source_crs = f.header.parse_crs()
-            if self.source_crs is None:
-                # Some USGS LAZ tiles have no embedded CRS — assume UTM NAD83 as a
-                # fallback. 
-                print("No CRS found in %s -- falling back to EPSG:4269 (NAD83).",
-                    self.laz_file_path)
-                dst_crs = "EPSG:4269"
-            elif self.source_crs.is_compound:
-                # Compound CRS (e.g. horizontal + vertical) -- take the horizontal component
-                dst_crs = f"EPSG:{self.source_crs.sub_crs_list[0].to_epsg()}"
+            # Check if crs has multiple components
+            if self.source_crs.is_compound:
+                # Get horizontal crs
+                # Only need horizontal projection since Shapely polygon is 2D
+                horizontal_crs = self.source_crs.sub_crs_list[0]
+                dst_crs = f"EPSG:{horizontal_crs.to_epsg()}"
             else:
                 dst_crs = f"EPSG:{self.source_crs.to_epsg()}"
-            
-            self.transformer = Transformer.from_crs("EPSG:4326", dst_crs, always_xy=True)
-            self.scales  = f.header.scales
+            # Make coordinate transformer from EPSG:4326 to LiDAR crs
+            self.transformer = Transformer.from_crs(
+                "EPSG:4326", dst_crs, always_xy=True)
+            # Get [x, y] scale factors to match transformed lat long
+            # to array values
+            self.scales = f.header.scales
             self.offsets = f.header.offsets
-        return laspy.read(self.laz_file_path)
+            # Get the points in chunks
+            points_list = []
+            for points in f.chunk_iterator(chunk_size):
+                points_list.append(points.array)
+            # Combine all chunks
+            concatenated_points = np.concatenate(points_list)
+            # Combine the points together and create a new LasData object
+            final_point_record.array = concatenated_points
+            laz_data = laspy.LasData(header=f.header)
+            laz_data.points = final_point_record
+        return laz_data
 
     def filterLaz(self, laz_data, classification_list=[1, 6],
                   lat_lon_bbox_size=20):
