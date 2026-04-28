@@ -10,6 +10,7 @@ Documentation
 - Added example gallery for the Mesh Scan, LiDAR, SOL-Searcher, Hail, and Hurricane Detection pipelines. (:pull:`48`)
 - Added Juypter Notebook tutorial to download and process MESH scans. (:pull:`44`)
 - Added Juypter Notebook tutorial for automated geotagging pipeline. (:pull:`53`)
+- Changed NREL to NLR in documentation. (:pull:`62`)
 
 Scripts
 ~~~~~~~
