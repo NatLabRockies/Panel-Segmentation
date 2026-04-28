@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 project = 'Panel Segmentation'
 copyright = ''
-author = 'NLR PV Reliability Team'
+author = 'NREL PVP&R Team'
 
 version = release = panel_segmentation.__version__
 
@@ -82,8 +82,8 @@ exclude_patterns =  ['_build','**.ipynb_checkpoints']
 pygments_style = None
 
 extlinks = {
-    'issue': ('https://github.com/NatLabRockies/Panel-Segmentation/issues/%s', 'GitHub Issue #'),
-    'pull': ('https://github.com/NatLabRockies/Panel-Segmentation/pull/%s', 'GitHub PR #'),
+    'issue': ('https://github.com/NREL/Panel-Segmentation/issues/%s', 'GitHub Issue #'),
+    'pull': ('https://github.com/NREL/Panel-Segmentation/pull/%s', 'GitHub PR #'),
     'ghuser': ('https://github.com/%s', 'GitHub User: '),
 }
 
@@ -113,7 +113,7 @@ html_theme_options = {
     # Remove right side bar and put everything on the left side bar
     'secondary_sidebar_items': [],
     # external links 
-    'github_url': "https://github.com/NatLabRockies/Panel-Segmentation",
+    'github_url': "https://github.com/NREL/Panel-Segmentation",
     # Footer settings
     'footer_start': ['copyright'],
     'footer_end': ['sphinx-version'],
@@ -125,7 +125,7 @@ html_sidebars = {
 }
 
 html_context = {
-    'github_user': 'NatLabRockies',
+    'github_user': 'NREL',
     'github_repo': 'Panel-Segmentation',
     'github_version': 'master', 
     'default_mode': 'light',
@@ -192,7 +192,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'panel-segmentation.tex', 'panel-segmentation Documentation',
-     'NREL PV Reliability Team', 'manual'),
+     'NREL PVP\\&R Team', 'manual'),
 ]
 
 

@@ -3,7 +3,6 @@
 config.yaml
 *.vs/
 **.pyc
-*.pth
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -14,5 +13,3 @@ generated
 
 venv/
 .idea/
-
-panel_segmentation.egg-info/
