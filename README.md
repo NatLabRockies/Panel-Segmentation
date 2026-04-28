@@ -4,7 +4,7 @@
 
 Automated metadata extraction for solar PV installations using satellite imagery and computer vision.
 
-[![Build Status](https://github.com/NREL/Panel-Segmentation/actions/workflows/pytest.yaml/badge.svg)](https://github.com/NREL/Panel-Segmentation/actions)
+[![Build Status](https://github.com/NatLabRockies/Panel-Segmentation/actions/workflows/pytest.yaml/badge.svg)](https://github.com/NatLabRockies/Panel-Segmentation/actions)
 [![Documentation Status](https://readthedocs.org/projects/panel-segmentation/badge/?version=latest)](https://panel-segmentation.readthedocs.io/en/latest/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -12,7 +12,7 @@ Automated metadata extraction for solar PV installations using satellite imagery
 
 ## Overview
 
-Panel-Segmentation provides tools to detect, locate, and characterize solar PV installations from satellite and aerial imagery. It is developed at the [National Renewable Energy Laboratory (NREL)](https://www.nrel.gov/).
+Panel-Segmentation provides tools to detect, locate, and characterize solar PV installations from satellite and aerial imagery. It is developed at the [National Laboratory of the Rockies (NLR)](https://www.nlr.gov/).
 
 **Capabilities include:**
 
@@ -46,7 +46,7 @@ git lfs install
 ### Install from source
 
 ```bash
-git clone https://github.com/NREL/Panel-Segmentation.git
+git clone https://github.com/NatLabRockies/Panel-Segmentation.git
 cd Panel-Segmentation
 pip install .
 ```
@@ -71,7 +71,7 @@ Full documentation — including installation guides, API reference, pipeline tu
 
 ## Contributing
 
-Contributions are welcome. Please open an issue or pull request on [GitHub](https://github.com/NREL/Panel-Segmentation).
+Contributions are welcome. Please open an issue or pull request on [GitHub](https://github.com/NatLabRockies/Panel-Segmentation).
 
 ---
 
@@ -85,4 +85,4 @@ K. Perry and C. Campos, "Panel Segmentation: A Python Package for Automated Sola
 
 ## License
 
-Panel-Segmentation is released under the [BSD 3-Clause License](LICENSE).
+Panel-Segmentation is released under the [MIT-Clause License](LICENSE).
