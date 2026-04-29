@@ -14,6 +14,7 @@ Helper functions and utilities.
    :toctree: generated/
    :caption: Utilities
 
+   utils.downloadModel
    utils.generateSatelliteImage
    utils.generateAddress
    utils.generateSatelliteImageryGrid
